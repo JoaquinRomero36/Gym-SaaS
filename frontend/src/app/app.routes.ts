@@ -2,7 +2,8 @@ import { Routes } from '@angular/router';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  // Landing pública
+  { path: '', loadComponent: () => import('./features/landing/landing.component').then(c => c.LandingComponent) },
 
   // Auth
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(c => c.LoginComponent) },
@@ -32,4 +33,7 @@ export const routes: Routes = [
     { path: 'notifications', loadComponent: () => import('./features/member/member-notifications/member-notifications.component').then(c => c.MemberNotificationsComponent) },
     { path: '', redirectTo: 'routine', pathMatch: 'full' },
   ]},
+
+  // Fallback
+  { path: '**', redirectTo: '' },
 ];

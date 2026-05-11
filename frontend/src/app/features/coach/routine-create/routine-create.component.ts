@@ -3,33 +3,61 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
+let _id = 0;
+function newId() { return ++_id; }
+
 @Component({
   selector: 'app-routine-create',
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="bg-white rounded shadow p-6 max-w-lg">
-      <h2 class="text-xl font-bold mb-4">Crear Rutina</h2>
-      <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-        <input [(ngModel)]="name" name="name" placeholder="Nombre de la rutina" class="border rounded px-3 py-2 text-sm" required>
+    <div class="animate-fade" style="max-width:640px">
+      <div class="page-header">
+        <h1 class="page-title">Crear Rutina</h1>
+        <p class="page-subtitle">Armá una rutina con ejercicios para asignar a un miembro</p>
+      </div>
 
-        <div class="flex gap-2 items-center">
-          <input [(ngModel)]="userId" name="userId" placeholder="ID del usuario" class="border rounded px-3 py-2 text-sm flex-1">
-          <input [(ngModel)]="gymId" name="gymId" placeholder="ID del gym" class="border rounded px-3 py-2 text-sm flex-1">
+      <form (ngSubmit)="onSubmit()" class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div class="input-group">
+            <label class="input-label">Nombre de la rutina</label>
+            <input [(ngModel)]="name" name="name" placeholder="Ej: Pecho y tríceps" class="input" required>
+          </div>
+          <div class="input-group">
+            <label class="input-label">ID del gym</label>
+            <input [(ngModel)]="gymId" name="gymId" placeholder="UUID del gym" class="input" required>
+          </div>
         </div>
 
-        <h3 class="font-semibold mt-2">Ejercicios</h3>
-        @for (e of exercises(); track $index) {
-          <div class="flex gap-2 items-center">
-            <input [(ngModel)]="e.name" [name]="'name_'+$index" placeholder="Nombre" class="border rounded px-2 py-1 text-sm flex-1">
-            <input [(ngModel)]="e.sets" [name]="'sets_'+$index" type="number" placeholder="Sets" class="border rounded px-2 py-1 text-sm w-16">
-            <input [(ngModel)]="e.reps" [name]="'reps_'+$index" type="number" placeholder="Reps" class="border rounded px-2 py-1 text-sm w-16">
-          </div>
-        }
-        <button type="button" (click)="addExercise()" class="text-indigo-600 text-sm self-start">+ Agregar ejercicio</button>
+        <div class="input-group" style="margin-bottom:20px">
+          <label class="input-label">ID del usuario (opcional)</label>
+          <input [(ngModel)]="userId" name="userId" placeholder="UUID del miembro" class="input">
+        </div>
 
-        @if (error) { <p class="text-red-600 text-sm">{{ error }}</p> }
-        <button type="submit" class="bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Guardar Rutina</button>
+        <div style="border-top:1px solid var(--color-border-light);padding-top:16px;margin-bottom:16px">
+          <div class="flex-between" style="margin-bottom:12px">
+            <span style="font-size:14px;font-weight:600;color:var(--color-text)">Ejercicios</span>
+            <button type="button" (click)="addExercise()" class="btn btn-ghost" style="color:var(--color-primary);font-weight:500">+ Agregar</button>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            @for (e of exercises(); track e._id) {
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-radius:var(--radius-md)">
+                <span style="font-size:13px;font-weight:700;color:#94a3b8;width:20px;text-align:center">{{ e._id }}</span>
+                <input [(ngModel)]="e.name" [name]="'name_'+e._id" placeholder="Nombre" class="input" style="flex:1;font-size:13px;padding:8px 12px">
+                <input [(ngModel)]="e.sets" [name]="'sets_'+e._id" type="number" placeholder="S" class="input" style="width:56px;text-align:center;font-size:13px;padding:8px">
+                <input [(ngModel)]="e.reps" [name]="'reps_'+e._id" type="number" placeholder="R" class="input" style="width:56px;text-align:center;font-size:13px;padding:8px">
+                <button type="button" (click)="removeExercise(e._id)" class="btn btn-ghost" style="color:#dc2626;padding:4px">✕</button>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (error()) {
+          <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ error() }}</div>
+        }
+
+        <button type="submit" class="btn btn-primary" style="width:100%;height:44px">💾 Guardar rutina</button>
       </form>
     </div>
   `,
@@ -40,32 +68,40 @@ export class RoutineCreateComponent {
   name = '';
   userId = '';
   gymId = '';
-  exercises = signal([{ name: '', sets: 3, reps: 10 }]);
-  error = '';
+  exercises = signal([{ _id: newId(), name: '', sets: 3, reps: 10 }]);
+  error = signal('');
 
   addExercise() {
-    this.exercises.update(e => [...e, { name: '', sets: 3, reps: 10 }]);
+    this.exercises.update(e => [...e, { _id: newId(), name: '', sets: 3, reps: 10 }]);
+  }
+
+  removeExercise(id: number) {
+    this.exercises.update(e => e.filter(x => x._id !== id));
   }
 
   onSubmit() {
-    this.error = '';
-    if (!this.name || !this.gymId) { this.error = 'Completá nombre y gym ID'; return; }
+    this.error.set('');
+    if (!this.name || !this.gymId) { this.error.set('Completá el nombre y el ID del gym'); return; }
 
-    this.http.post('/api/v1/routines', { name: this.name, user_id: this.userId || null, gym_id: this.gymId })
-      .subscribe({
-        next: (routine: any) => {
-          const bulk = this.exercises().filter(e => e.name).map((e, i) => ({
-            routine_id: routine.id, name: e.name, sets: e.sets, reps: e.reps, order: i,
-          }));
-          if (bulk.length) {
-            this.http.post('/api/v1/exercises/bulk', bulk).subscribe(() =>
-              this.router.navigate(['/coach/routines'])
-            );
-          } else {
-            this.router.navigate(['/coach/routines']);
-          }
-        },
-        error: () => this.error = 'Error al crear rutina',
-      });
+    this.http.post('/api/v1/routines', {
+      name: this.name,
+      user_id: this.userId || null,
+      gym_id: this.gymId,
+      coach_id: null,
+    }).subscribe({
+      next: (routine: any) => {
+        const bulk = this.exercises().filter(e => e.name).map((e, i) => ({
+          routine_id: routine.id, name: e.name, sets: Number(e.sets), reps: Number(e.reps), order: i,
+        }));
+        if (bulk.length) {
+          this.http.post('/api/v1/exercises/bulk', bulk).subscribe(() =>
+            this.router.navigate(['/coach/routines'])
+          );
+        } else {
+          this.router.navigate(['/coach/routines']);
+        }
+      },
+      error: () => this.error.set('Error al crear rutina'),
+    });
   }
 }

@@ -14,6 +14,7 @@ export declare class UsersService {
         password: string;
         coach_id?: string | null;
         level?: string;
+        role?: string;
     }): Promise<User>;
     update(id: string, data: Partial<User>): Promise<User>;
     remove(id: string): Promise<void>;

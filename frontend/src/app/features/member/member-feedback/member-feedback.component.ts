@@ -8,33 +8,62 @@ import { AuthService } from '../../../core/auth.service';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <h2 class="text-xl font-bold mb-4">Feedback de la sesión</h2>
-    <form (ngSubmit)="onSubmit()" class="bg-white rounded shadow p-6 max-w-md flex flex-col gap-4">
-      <div>
-        <label class="text-sm font-medium">Esfuerzo (1-5)</label>
-        <div class="flex gap-2 mt-1">
-          @for (n of [1,2,3,4,5]; track n) {
-            <button type="button" (click)="effort.set(n)"
-                    [class]="'w-10 h-10 rounded-full border text-sm ' + (effort() === n ? 'bg-indigo-600 text-white' : 'hover:bg-gray-100')">
-              {{ n }}
-            </button>
-          }
-        </div>
+    <div class="animate-fade" style="max-width:520px">
+      <div class="page-header">
+        <h1 class="page-title">Feedback de la sesión</h1>
+        <p class="page-subtitle">Decinos cómo te sentiste después de entrenar</p>
       </div>
-      <div>
-        <label class="text-sm font-medium">Energía (1-5)</label>
-        <div class="flex gap-2 mt-1">
-          @for (n of [1,2,3,4,5]; track n) {
-            <button type="button" (click)="energy.set(n)"
-                    [class]="'w-10 h-10 rounded-full border text-sm ' + (energy() === n ? 'bg-indigo-600 text-white' : 'hover:bg-gray-100')">
-              {{ n }}
-            </button>
-          }
+
+      <form (ngSubmit)="onSubmit()" class="card">
+        <div style="margin-bottom:24px">
+          <label class="input-label" style="margin-bottom:12px">Nivel de esfuerzo</label>
+          <div style="display:flex;gap:8px">
+            @for (n of [1,2,3,4,5]; track n) {
+              <button type="button" (click)="effort.set(n)"
+                      [style]="effort() === n
+                        ? 'background:var(--color-primary);color:white;border-color:var(--color-primary);transform:scale(1.05)'
+                        : 'background:white;color:#94a3b8;border-color:#e2e8f0'"
+                      style="flex:1;height:52px;border-radius:var(--radius-md);border:2px solid;font-size:18px;font-weight:700;cursor:pointer;transition:all 0.15s">
+                {{ n }}
+              </button>
+            }
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-muted);margin-top:6px;padding:0 4px">
+            <span>Muy fácil</span>
+            <span>Muy intenso</span>
+          </div>
         </div>
-      </div>
-      @if (sent()) { <p class="text-green-600 text-sm">¡Feedback registrado!</p> }
-      <button type="submit" class="bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Enviar</button>
-    </form>
+
+        <div style="margin-bottom:24px">
+          <label class="input-label" style="margin-bottom:12px">Nivel de energía</label>
+          <div style="display:flex;gap:8px">
+            @for (n of [1,2,3,4,5]; track n) {
+              <button type="button" (click)="energy.set(n)"
+                      [style]="energy() === n
+                        ? 'background:#059669;color:white;border-color:#059669;transform:scale(1.05)'
+                        : 'background:white;color:#94a3b8;border-color:#e2e8f0'"
+                      style="flex:1;height:52px;border-radius:var(--radius-md);border:2px solid;font-size:18px;font-weight:700;cursor:pointer;transition:all 0.15s">
+                {{ n }}
+              </button>
+            }
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-muted);margin-top:6px;padding:0 4px">
+            <span>Sin energía</span>
+            <span>Lleno de energía</span>
+          </div>
+        </div>
+
+        @if (sent()) {
+          <div style="background:var(--color-success-bg);color:var(--color-success);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+            ✅ ¡Feedback registrado! Seguí así 💪
+          </div>
+        }
+
+        <button type="submit" [disabled]="sent()" class="btn btn-primary" style="width:100%;height:44px">
+          {{ sent() ? 'Enviado' : 'Enviar feedback' }}
+        </button>
+      </form>
+    </div>
   `,
 })
 export class MemberFeedbackComponent {

@@ -9,10 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = exports.UserStatus = exports.UserLevel = void 0;
+exports.User = exports.UserStatus = exports.UserLevel = exports.UserRole = void 0;
 const typeorm_1 = require("typeorm");
 const gym_entity_1 = require("../gyms/gym.entity");
 const coach_entity_1 = require("../coaches/coach.entity");
+var UserRole;
+(function (UserRole) {
+    UserRole["ADMIN"] = "admin";
+    UserRole["COACH"] = "coach";
+    UserRole["MEMBER"] = "member";
+})(UserRole || (exports.UserRole = UserRole = {}));
 var UserLevel;
 (function (UserLevel) {
     UserLevel["BEGINNER"] = "beginner";
@@ -62,6 +68,14 @@ __decorate([
     (0, typeorm_1.Column)({ name: 'password_hash' }),
     __metadata("design:type", String)
 ], User.prototype, "passwordHash", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: UserRole,
+        default: UserRole.MEMBER,
+    }),
+    __metadata("design:type", String)
+], User.prototype, "role", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',

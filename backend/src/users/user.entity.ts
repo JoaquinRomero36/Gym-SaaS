@@ -9,6 +9,12 @@ import {
 import { Gym } from '../gyms/gym.entity';
 import { Coach } from '../coaches/coach.entity';
 
+export enum UserRole {
+  ADMIN = 'admin',
+  COACH = 'coach',
+  MEMBER = 'member',
+}
+
 export enum UserLevel {
   BEGINNER = 'beginner',
   INTERMEDIATE = 'intermediate',
@@ -48,6 +54,13 @@ export class User {
 
   @Column({ name: 'password_hash' })
   passwordHash!: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.MEMBER,
+  })
+  role!: UserRole;
 
   @Column({
     type: 'enum',

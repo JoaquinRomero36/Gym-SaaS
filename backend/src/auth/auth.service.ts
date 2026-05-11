@@ -34,7 +34,7 @@ export class AuthService {
     const valid = await this.usersService.validatePassword(user, password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    return this.buildResponse(user, 'member');
+    return this.buildResponse(user, user.role);
   }
 
   async refresh(refreshToken: string): Promise<{ access_token: string }> {

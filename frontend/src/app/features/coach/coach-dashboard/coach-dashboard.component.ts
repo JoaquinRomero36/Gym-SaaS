@@ -8,16 +8,38 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div>
-      <h2 class="text-xl font-bold mb-4">Mis Miembros</h2>
-      <div class="grid gap-3">
+    <div class="animate-fade">
+      <div class="page-header">
+        <h1 class="page-title">Mis Miembros</h1>
+        <p class="page-subtitle">{{ members().length }} miembros asignados</p>
+      </div>
+
+      @if (members().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">👥</span>
+          <h3 class="empty-title">Sin miembros</h3>
+          <p class="empty-text">Aún no tenés miembros asignados.</p>
+        </div>
+      }
+
+      <div style="display:flex;flex-direction:column;gap:8px">
         @for (m of members(); track m.id) {
-          <a [routerLink]="['/coach/members', m.id]" class="bg-white rounded shadow p-4 flex justify-between items-center hover:shadow-md transition">
-            <div>
-              <p class="font-medium">{{ m.name }}</p>
-              <p class="text-sm text-gray-500">{{ m.email }} · {{ m.level }}</p>
+          <a [routerLink]="['/coach/members', m.id]" class="member-card">
+            <div style="display:flex;align-items:center;gap:16px">
+              <div class="avatar" style="background:#eef2ff;color:#4f46e5">{{ m.name.charAt(0) }}</div>
+              <div>
+                <div style="font-weight:600;font-size:14px;margin-bottom:2px">{{ m.name }}</div>
+                <div style="font-size:13px;color:var(--color-text-secondary)">{{ m.email }} · {{ m.level }}</div>
+              </div>
             </div>
-            <span [class]="m.status === 'active' ? 'text-green-600' : 'text-red-600'" class="text-sm font-medium">{{ m.status }}</span>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="badge" [class.badge-success]="m.status === 'active'" [class.badge-danger]="m.status !== 'active'">
+                {{ m.status }}
+              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                <path d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
           </a>
         }
       </div>

@@ -81,6 +81,7 @@ let UsersService = class UsersService {
             email: data.email,
             passwordHash: await bcrypt.hash(data.password, 10),
             level: data.level ?? user_entity_1.UserLevel.BEGINNER,
+            role: data.role ?? 'member',
         });
         return this.repo.save(user);
     }

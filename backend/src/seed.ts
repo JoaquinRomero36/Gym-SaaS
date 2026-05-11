@@ -2,14 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { GymsService } from './gyms/gyms.service';
 import { UsersService } from './users/users.service';
+import { CoachesService } from './coaches/coaches.service';
 import { GymPlan } from './gyms/gym.entity';
-import * as bcrypt from 'bcrypt';
 
 async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
 
   const gymsService = app.get(GymsService);
   const usersService = app.get(UsersService);
+  const coachesService = app.get(CoachesService);
 
   // Create a gym
   const gym = await gymsService.create({
@@ -19,26 +20,26 @@ async function seed() {
   console.log(`✓ Gym created: ${gym.name} (${gym.id})`);
 
   // Create an admin user for the gym
-  const admin = await usersService.create({
+  await usersService.create({
     gym_id: gym.id,
     name: 'Admin',
     email: 'admin@gym.com',
     password: 'admin123',
+    role: 'admin',
   });
-  console.log(`✓ Admin created: ${admin.email}`);
+  console.log('✓ Admin created: admin@gym.com');
 
-  // Create a coach
-  const coach = await usersService.create({
+  // Create a coach in the coaches table
+  const coach = await coachesService.create({
     gym_id: gym.id,
     name: 'Coach Demo',
     email: 'coach@gym.com',
     password: 'coach123',
-    level: 'advanced',
   });
-  console.log(`✓ Coach created: ${coach.email}`);
+  console.log(`✓ Coach created: coach@gym.com (${coach.id})`);
 
-  // Create a member
-  const member = await usersService.create({
+  // Create a member referencing the coach
+  await usersService.create({
     gym_id: gym.id,
     coach_id: coach.id,
     name: 'Miembro Demo',
@@ -46,9 +47,13 @@ async function seed() {
     password: 'member123',
     level: 'beginner',
   });
-  console.log(`✓ Member created: ${member.email}`);
+  console.log('✓ Member created: member@gym.com');
 
   console.log('\n✅ Seed completed');
+  console.log('   Admin:  admin@gym.com / admin123');
+  console.log('   Coach:  coach@gym.com / coach123');
+  console.log('   Member: member@gym.com / member123');
+
   await app.close();
 }
 

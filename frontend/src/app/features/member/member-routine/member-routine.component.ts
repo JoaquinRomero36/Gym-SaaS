@@ -7,23 +7,47 @@ import { AuthService } from '../../../core/auth.service';
   selector: 'app-member-routine',
   standalone: true,
   template: `
-    <h2 class="text-xl font-bold mb-4">Mi Rutina de Hoy</h2>
-    @for (r of routines(); track r.id) {
-      <div class="bg-white rounded shadow p-4 mb-4">
-        <h3 class="font-semibold text-lg mb-2">{{ r.name }}</h3>
-        <div class="flex flex-col gap-2">
-          @for (e of r.exercises; track e.id) {
-            <label class="flex items-center gap-3 border rounded p-3 hover:bg-gray-50 cursor-pointer">
-              <input type="checkbox" class="accent-indigo-600">
-              <span>{{ e.name }}</span>
-              <span class="text-sm text-gray-500 ml-auto">{{ e.sets }}x{{ e.reps }}</span>
-            </label>
-          }
-        </div>
+    <div class="animate-fade" style="max-width:720px">
+      <div class="page-header">
+        <h1 class="page-title">Mi Rutina</h1>
+        <p class="page-subtitle">Ejercicios asignados para hoy</p>
       </div>
-    } @empty {
-      <p class="text-gray-400">No tenés rutinas asignadas todavía.</p>
-    }
+
+      @if (routines().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📋</span>
+          <h3 class="empty-title">Sin rutina asignada</h3>
+          <p class="empty-text">Tu coach aún no te asignó una rutina. Consultá con él en tu próxima visita.</p>
+        </div>
+      }
+
+      @for (r of routines(); track r.id) {
+        <div class="card" style="margin-bottom:24px">
+          <div class="card-header">
+            <div>
+              <h2 style="font-size:17px;font-weight:600;margin:0 0 4px">{{ r.name }}</h2>
+              <span style="font-size:13px;color:var(--color-text-secondary)">{{ r.exercises?.length ?? 0 }} ejercicios</span>
+            </div>
+            <span class="badge badge-primary">Hoy</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            @for (e of r.exercises; track e.id; let i = $index) {
+              <label class="exercise-item">
+                <div class="exercise-num">{{ i + 1 }}</div>
+                <input type="checkbox" style="width:16px;height:16px;accent-color:var(--color-primary);flex-shrink:0">
+                <span style="flex:1;font-weight:500;font-size:14px">{{ e.name }}</span>
+                <span class="exercise-detail">{{ e.sets }} × {{ e.reps }}</span>
+              </label>
+            }
+          </div>
+
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-light);display:flex;justify-content:flex-end">
+            <button class="btn btn-primary">Completar sesión</button>
+          </div>
+        </div>
+      }
+    </div>
   `,
 })
 export class MemberRoutineComponent {

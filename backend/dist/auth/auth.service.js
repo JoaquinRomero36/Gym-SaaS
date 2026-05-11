@@ -31,7 +31,7 @@ let AuthService = class AuthService {
         const valid = await this.usersService.validatePassword(user, password);
         if (!valid)
             throw new common_1.UnauthorizedException('Invalid credentials');
-        return this.buildResponse(user, 'member');
+        return this.buildResponse(user, user.role);
     }
     async refresh(refreshToken) {
         try {

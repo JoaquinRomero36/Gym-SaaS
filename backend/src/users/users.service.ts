@@ -28,7 +28,7 @@ export class UsersService {
 
   async create(data: {
     gym_id: string; name: string; email: string; password: string;
-    coach_id?: string | null; level?: string;
+    coach_id?: string | null; level?: string; role?: string;
   }): Promise<User> {
     const existing = await this.findByEmail(data.email);
     if (existing) throw new ConflictException('Email already in use');
@@ -40,6 +40,7 @@ export class UsersService {
       email: data.email,
       passwordHash: await bcrypt.hash(data.password, 10),
       level: (data.level as UserLevel) ?? UserLevel.BEGINNER,
+      role: (data.role as any) ?? 'member',
     });
     return this.repo.save(user);
   }

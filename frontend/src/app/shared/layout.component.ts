@@ -9,11 +9,11 @@ import { SidebarComponent, NavItem } from './sidebar.component';
   standalone: true,
   imports: [RouterOutlet, NavbarComponent, SidebarComponent],
   template: `
-    <div class="flex flex-col h-screen">
+    <div style="display:flex;flex-direction:column;height:100vh">
       <app-navbar [role]="roleLabel()" [userName]="userName()" (logout)="onLogout()" />
-      <div class="flex flex-1">
+      <div style="display:flex;flex:1;overflow:hidden">
         <app-sidebar [items]="navItems()" />
-        <main class="flex-1 p-6 overflow-y-auto bg-gray-50">
+        <main style="flex:1;overflow-y:auto;padding:32px;background:var(--color-bg)">
           <router-outlet />
         </main>
       </div>
@@ -23,7 +23,10 @@ import { SidebarComponent, NavItem } from './sidebar.component';
 export class LayoutComponent {
   user = this.auth.user;
   userName = computed(() => this.user()?.name ?? '');
-  roleLabel = computed(() => this.user()?.role ?? '');
+  roleLabel = computed(() => {
+    const r = this.user()?.role;
+    return r === 'admin' ? 'Administrador' : r === 'coach' ? 'Coach' : 'Miembro';
+  });
 
   navItems = computed<NavItem[]>(() => {
     const role = this.user()?.role;
@@ -34,7 +37,7 @@ export class LayoutComponent {
     if (role === 'coach') return [
       { label: 'Dashboard', route: '/coach/dashboard', icon: '📊' },
       { label: 'Rutinas', route: '/coach/routines', icon: '📋' },
-      { label: 'Crear Rutina', route: '/coach/routines/create', icon: '➕' },
+      { label: 'Nueva Rutina', route: '/coach/routines/create', icon: '➕' },
     ];
     return [
       { label: 'Mi Rutina', route: '/member/routine', icon: '💪' },

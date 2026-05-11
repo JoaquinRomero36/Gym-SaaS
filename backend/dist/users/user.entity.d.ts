@@ -1,5 +1,10 @@
 import { Gym } from '../gyms/gym.entity';
 import { Coach } from '../coaches/coach.entity';
+export declare enum UserRole {
+    ADMIN = "admin",
+    COACH = "coach",
+    MEMBER = "member"
+}
 export declare enum UserLevel {
     BEGINNER = "beginner",
     INTERMEDIATE = "intermediate",
@@ -19,6 +24,7 @@ export declare class User {
     name: string;
     email: string;
     passwordHash: string;
+    role: UserRole;
     level: UserLevel;
     joinedAt: Date;
     status: UserStatus;
