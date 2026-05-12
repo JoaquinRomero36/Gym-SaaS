@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TenantService } from '../common/services/tenant.service';
+import { AiClientService } from '../common/services/ai-client.service';
 import { RiskScore, RiskCategory } from './risk-score.entity';
 import { ChurnFeatures, ChurnResult } from './risk.types';
 import { AttendanceService } from '../attendance/attendance.service';
@@ -20,19 +21,20 @@ export class RiskService {
     private readonly attendanceService: AttendanceService,
     private readonly feedbackService: FeedbackService,
     private readonly tenantService: TenantService,
+    private readonly aiClient: AiClientService,
     config: ConfigService,
   ) {
     this.highThreshold = config.get<number>('CHURN_THRESHOLD_HIGH', 0.7);
     this.mediumThreshold = config.get<number>('CHURN_THRESHOLD_MEDIUM', 0.4);
   }
 
-  async calculateFeatures(user: User): Promise<ChurnFeatures> {
-    const lastAttendance = await this.attendanceService.getLastAttendance(user.id);
+  async calculateFeatures(user: User, gymId?: string): Promise<ChurnFeatures> {
+    const lastAttendance = await this.attendanceService.getLastAttendance(user.id, gymId);
     const daysSinceLast = lastAttendance
       ? Math.floor((Date.now() - new Date(lastAttendance.date).getTime()) / 86400000)
       : 999;
 
-    const weeklyFrequency = (await this.attendanceService.countInRange(user.id, 28)) / 4;
+    const weeklyFrequency = (await this.attendanceService.countInRange(user.id, 28, gymId)) / 4;
 
     const tenureDays = Math.floor(
       (Date.now() - new Date(user.joinedAt).getTime()) / 86400000,
@@ -40,9 +42,9 @@ export class RiskService {
 
     const consistencyScore = Math.min(weeklyFrequency / 4, 1);
 
-    const avgEffort = await this.feedbackService.averageEffort(user.id, 5);
-    const avgEnergy = await this.feedbackService.averageEnergy(user.id, 5);
-    const feedbackCount = await this.feedbackService.countInRange(user.id, 14);
+    const avgEffort = await this.feedbackService.averageEffort(user.id, 5, gymId);
+    const avgEnergy = await this.feedbackService.averageEnergy(user.id, 5, gymId);
+    const feedbackCount = await this.feedbackService.countInRange(user.id, 14, gymId);
 
     return {
       days_since_last_attendance: daysSinceLast,
@@ -80,12 +82,38 @@ export class RiskService {
     return { score, category };
   }
 
-  async calculateForUser(user: User): Promise<ChurnResult> {
-    const features = await this.calculateFeatures(user);
-    const { score, category } = this.computeScore(features);
+  private parseCategory(category: string): RiskCategory {
+    switch (category.toLowerCase()) {
+      case 'high': return RiskCategory.HIGH;
+      case 'medium': return RiskCategory.MEDIUM;
+      default: return RiskCategory.LOW;
+    }
+  }
+
+  async calculateForUser(user: User, gymId?: string): Promise<ChurnResult> {
+    const targetGymId = gymId || this.tenantService.gymId;
+    const gId = targetGymId; // use consistently
+
+    const features = await this.calculateFeatures(user, gId);
+
+    // Try AI Service first, fall back to local computation
+    const aiResult = await this.aiClient.predictChurn(features);
+    let score: number;
+    let category: RiskCategory;
+
+    if (aiResult) {
+      score = aiResult.score;
+      category = this.parseCategory(aiResult.category);
+      this.logger.log(`AI Service scored user ${user.id}: ${score.toFixed(4)} (${category})`);
+    } else {
+      const local = this.computeScore(features);
+      score = local.score;
+      category = local.category;
+      this.logger.log(`Local fallback scored user ${user.id}: ${score.toFixed(4)} (${category})`);
+    }
 
     const existing = await this.repo.findOne({
-      where: { user_id: user.id, gym_id: this.tenantService.gymId },
+      where: { user_id: user.id, gym_id: gId },
     });
     if (existing) {
       existing.score = score;
@@ -96,7 +124,7 @@ export class RiskService {
       await this.repo.save(
         this.repo.create({
           user_id: user.id,
-          gym_id: this.tenantService.gymId,
+          gym_id: gId,
           score,
           category,
           features: features as any,
@@ -108,9 +136,24 @@ export class RiskService {
     return { score, category, features };
   }
 
+  async calculateForUserBatch(user: User, gymId: string): Promise<ChurnResult> {
+    return this.tenantService.runInTenantContext(gymId, async () => {
+      return this.calculateForUser(user, gymId);
+    });
+  }
+
   async getLatest(userId: string): Promise<RiskScore | null> {
+    const gymId = this.tenantService.safeGymId;
+    if (!gymId) {
+      const scores = await this.repo.find({
+        where: { user_id: userId },
+        order: { calculatedAt: 'DESC' },
+        take: 1,
+      });
+      return scores[0] ?? null;
+    }
     const scores = await this.repo.find({
-      where: { user_id: userId, gym_id: this.tenantService.gymId },
+      where: { user_id: userId, gym_id: gymId },
       order: { calculatedAt: 'DESC' },
       take: 1,
     });

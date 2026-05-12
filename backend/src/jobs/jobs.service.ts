@@ -66,25 +66,34 @@ export class JobsService {
     });
     this.logger.log(`Processing batch for ${activeUsers.length} users`);
 
+    // Group users by gym for tenant context
+    const usersByGym: Record<string, User[]> = {};
     for (const user of activeUsers) {
-      try {
-        const result = await this.riskService.calculateForUser(user);
+      if (!usersByGym[user.gym_id]) usersByGym[user.gym_id] = [];
+      usersByGym[user.gym_id].push(user);
+    }
 
-        // If high risk, trigger coach alert
-        if (result.category === 'high') {
-          await this.coachAlertQueue.add(
-            'alert',
-            { userId: user.id, score: result.score, gymId: user.gym_id },
-            { removeOnComplete: { age: 3600 * 24 } },
-          );
-        }
+    for (const [gymId, users] of Object.entries(usersByGym)) {
+      for (const user of users) {
+        try {
+          const result = await this.riskService.calculateForUserBatch(user, gymId);
 
-        // Send message via AI service
-        if (result.category === 'high' || result.category === 'medium') {
-          await this.triggerMessaging(user.id, result.category);
+          // If high risk, trigger coach alert
+          if (result.category === 'high') {
+            await this.coachAlertQueue.add(
+              'alert',
+              { userId: user.id, score: result.score, gymId: user.gym_id },
+              { removeOnComplete: { age: 3600 * 24 } },
+            );
+          }
+
+          // Send message via AI service
+          if (result.category === 'high' || result.category === 'medium') {
+            await this.triggerMessaging(user.id, result.category);
+          }
+        } catch (err) {
+          this.logger.error(`Batch error for user ${user.id}:`, err);
         }
-      } catch (err) {
-        this.logger.error(`Batch error for user ${user.id}:`, err);
       }
     }
   }

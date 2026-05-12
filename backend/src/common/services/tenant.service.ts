@@ -1,22 +1,31 @@
-import { Injectable, Scope, Inject } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
+import { Injectable } from '@nestjs/common';
+import { AsyncLocalStorage } from 'async_hooks';
 
-interface TenantRequest extends Request {
-  gymId?: string;
+export interface TenantContext {
+  gymId: string;
 }
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class TenantService {
-  constructor(@Inject(REQUEST) private readonly request: TenantRequest) {}
+  private readonly storage = new AsyncLocalStorage<TenantContext>();
 
-  get gymId(): string {
-    return this.request.gymId!;
+  setTenantContext(gymId: string): void {
+    this.storage.enterWith({ gymId });
   }
 
-  throwIfNoTenant(): void {
-    if (!this.gymId) {
-      throw new Error('No gymId found in request. TenantGuard must be active.');
+  get gymId(): string {
+    const ctx = this.storage.getStore();
+    if (!ctx) {
+      throw new Error('Tenant context not available. TenantGuard must be active or gymId must be provided explicitly.');
     }
+    return ctx.gymId;
+  }
+
+  get safeGymId(): string | undefined {
+    return this.storage.getStore()?.gymId;
+  }
+
+  async runInTenantContext<T>(gymId: string, fn: () => Promise<T>): Promise<T> {
+    return this.storage.run({ gymId }, fn);
   }
 }

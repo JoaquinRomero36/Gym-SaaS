@@ -14,10 +14,14 @@ export class FeedbackService {
     private readonly tenantService: TenantService,
   ) {}
 
-  async create(dto: CreateFeedbackDto): Promise<FeedbackEntry> {
+  private getGymId(explicitGymId?: string): string {
+    return explicitGymId || this.tenantService.gymId;
+  }
+
+  async create(dto: CreateFeedbackDto, gymId?: string): Promise<FeedbackEntry> {
     const entry = this.repo.create({
       user_id: dto.user_id,
-      gym_id: this.tenantService.gymId,
+      gym_id: this.getGymId(gymId),
       date: new Date(dto.date),
       effortLevel: dto.effort_level,
       energyLevel: dto.energy_level,
@@ -26,38 +30,38 @@ export class FeedbackService {
     return this.repo.save(entry);
   }
 
-  async findByUser(userId: string): Promise<FeedbackEntry[]> {
+  async findByUser(userId: string, gymId?: string): Promise<FeedbackEntry[]> {
     return this.repo.find({
-      where: { user_id: userId, gym_id: this.tenantService.gymId },
+      where: { user_id: userId, gym_id: this.getGymId(gymId) },
       order: { date: 'DESC' },
     });
   }
 
-  async getLastN(userId: string, n: number): Promise<FeedbackEntry[]> {
+  async getLastN(userId: string, n: number, gymId?: string): Promise<FeedbackEntry[]> {
     return this.repo.find({
-      where: { user_id: userId, gym_id: this.tenantService.gymId },
+      where: { user_id: userId, gym_id: this.getGymId(gymId) },
       order: { date: 'DESC' },
       take: n,
     });
   }
 
-  async countInRange(userId: string, days: number): Promise<number> {
+  async countInRange(userId: string, days: number, gymId?: string): Promise<number> {
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - days);
     return this.repo.count({
-      where: { user_id: userId, gym_id: this.tenantService.gymId, date: Between(start, end) },
+      where: { user_id: userId, gym_id: this.getGymId(gymId), date: Between(start, end) },
     });
   }
 
-  async averageEffort(userId: string, lastN: number): Promise<number> {
-    const entries = await this.getLastN(userId, lastN);
+  async averageEffort(userId: string, lastN: number, gymId?: string): Promise<number> {
+    const entries = await this.getLastN(userId, lastN, gymId);
     if (!entries.length) return 0;
     return entries.reduce((a, e) => a + e.effortLevel, 0) / entries.length;
   }
 
-  async averageEnergy(userId: string, lastN: number): Promise<number> {
-    const entries = await this.getLastN(userId, lastN);
+  async averageEnergy(userId: string, lastN: number, gymId?: string): Promise<number> {
+    const entries = await this.getLastN(userId, lastN, gymId);
     if (!entries.length) return 0;
     return entries.reduce((a, e) => a + e.energyLevel, 0) / entries.length;
   }

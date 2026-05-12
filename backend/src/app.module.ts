@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { HttpModule } from '@nestjs/axios';
 import { HealthModule } from './health/health.module';
 import { GymsModule } from './gyms/gyms.module';
 import { UsersModule } from './users/users.module';
@@ -17,10 +18,12 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { TenantService } from './common/services/tenant.service';
+import { AiClientService } from './common/services/ai-client.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.local'] }),
+    HttpModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -50,10 +53,11 @@ import { TenantService } from './common/services/tenant.service';
   ],
   providers: [
     TenantService,
+    AiClientService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: TenantGuard },
   ],
-  exports: [TenantService],
+  exports: [TenantService, AiClientService],
 })
 export class AppModule {}
