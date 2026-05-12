@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Coach } from '../coaches/coach.entity';

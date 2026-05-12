@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Gym } from '../gyms/gym.entity';
 import { Coach } from '../coaches/coach.entity';
@@ -49,7 +50,8 @@ export class User {
   @Column()
   name!: string;
 
-  @Column({ unique: true })
+@Column({ unique: true })
+  @Index()
   email!: string;
 
   @Column({ name: 'password_hash' })
@@ -69,13 +71,14 @@ export class User {
   })
   level!: UserLevel;
 
-  @CreateDateColumn({ name: 'joined_at' })
-  joinedAt!: Date;
-
   @Column({
     type: 'enum',
     enum: UserStatus,
     default: UserStatus.ACTIVE,
   })
+  @Index()
   status!: UserStatus;
+
+  @CreateDateColumn({ name: 'joined_at' })
+  joinedAt!: Date;
 }

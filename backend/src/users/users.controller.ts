@@ -4,13 +4,17 @@ import {
 } from '@nestjs/common';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { TenantService } from '../common/services/tenant.service';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { User } from './user.entity';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly service: UsersService) {}
+  constructor(
+    private readonly service: UsersService,
+    private readonly tenantService: TenantService,
+  ) {}
 
   @Post()
   @Roles('admin', 'coach')
@@ -22,11 +26,8 @@ export class UsersController {
   @Roles('admin', 'coach')
   async findAll(
     @Query('gym_id') gymId?: string,
-    @Query('coach_id') coachId?: string,
   ): Promise<User[]> {
-    if (coachId) return this.service.findAllByCoach(coachId);
-    if (gymId) return this.service.findAllByGym(gymId);
-    return [];
+    return this.service.findAllByGym(this.tenantService.gymId);
   }
 
   @Get(':id')

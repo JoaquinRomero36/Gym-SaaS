@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../../../core/auth.service';
 import { AuthResponse } from '../../../core/types';
 
@@ -64,12 +65,18 @@ export class RegisterComponent {
 
   onSubmit() {
     this.error.set(''); this.success.set('');
-    this.auth.register({ gym_id: '', name: this.name, email: this.email, password: this.password }).subscribe({
-      next: (_res: AuthResponse) => {
-        this.success.set('Registro exitoso. Redirigiendo...');
-        setTimeout(() => this.router.navigate(['/login']), 1500);
-      },
-      error: () => this.error.set('Error al registrarse. Intentá de nuevo.'),
-    });
+    this.auth.register({ gym_id: '', name: this.name, email: this.email, password: this.password })
+      .pipe(
+        catchError(err => {
+          this.error.set(err.status === 400 ? 'El ID de gym es obligatorio. Usá el seed para crear uno.' : 'Error al registrarse. Intentá de nuevo.');
+          return throwError(() => err);
+        })
+      ).subscribe({
+        next: (_res: AuthResponse) => {
+          this.success.set('Registro exitoso. Redirigiendo...');
+          setTimeout(() => this.router.navigate(['/login']), 1500);
+        },
+        error: () => {},
+      });
   }
 }

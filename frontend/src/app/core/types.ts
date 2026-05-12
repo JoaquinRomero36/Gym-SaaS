@@ -9,7 +9,7 @@ export interface UserInfo {
   email: string;
   name: string;
   role: string;
-  gym_id: string;
+  gymId: string;
 }
 
 export interface LoginRequest {

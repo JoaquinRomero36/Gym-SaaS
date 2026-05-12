@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Gym } from '../gyms/gym.entity';
 
@@ -18,6 +18,7 @@ export class RiskScore {
   user!: User;
 
   @Column({ name: 'user_id' })
+  @Index()
   user_id!: string;
 
   @ManyToOne(() => Gym, { onDelete: 'CASCADE' })
@@ -25,6 +26,7 @@ export class RiskScore {
   gym!: Gym;
 
   @Column({ name: 'gym_id' })
+  @Index()
   gym_id!: string;
 
   @Column({ type: 'decimal', precision: 5, scale: 4 })
@@ -35,9 +37,11 @@ export class RiskScore {
     enum: RiskCategory,
     default: RiskCategory.LOW,
   })
+  @Index()
   category!: RiskCategory;
 
   @CreateDateColumn({ name: 'calculated_at' })
+  @Index()
   calculatedAt!: Date;
 
   @Column({ type: 'jsonb', nullable: true })

@@ -102,7 +102,7 @@ export class JobsService {
   // ─── Send message via AI Service ────────────────────────────────
   async processMessage(userId: string, trigger: string) {
     try {
-      const features = await this.riskService.getFeatures(userId);
+      const features = await this.riskService.getFeature(userId);
       if (!features) {
         this.logger.warn(`No features for user ${userId}`);
         return;
@@ -122,7 +122,6 @@ export class JobsService {
 
       await this.notificationsService.create({
         user_id: userId,
-        gym_id: user.gym_id,
         channel: 'in-app',
         message: data.message,
         trigger: trigger as any,
@@ -140,8 +139,7 @@ export class JobsService {
     if (!user?.coach_id) return;
 
     await this.notificationsService.create({
-      user_id: user.coach_id,
-      gym_id: gymId,
+      user_id: user.coach_id as string,
       channel: 'in-app',
       message: `⚠️ Alerta: ${user.name} tiene alto riesgo de abandono (score: ${score.toFixed(2)})`,
       trigger: 'high_risk',

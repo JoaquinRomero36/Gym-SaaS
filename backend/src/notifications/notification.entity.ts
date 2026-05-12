@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Gym } from '../gyms/gym.entity';
 
@@ -32,6 +32,7 @@ export class Notification {
   user!: User;
 
   @Column({ name: 'user_id' })
+  @Index()
   user_id!: string;
 
   @ManyToOne(() => Gym, { onDelete: 'CASCADE' })
@@ -39,6 +40,7 @@ export class Notification {
   gym!: Gym;
 
   @Column({ name: 'gym_id' })
+  @Index()
   gym_id!: string;
 
   @Column({

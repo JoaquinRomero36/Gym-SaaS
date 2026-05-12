@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { FeedbackEntry } from './feedback-entry.entity';
 import { CreateFeedbackDto } from './dto';
 
@@ -10,12 +11,13 @@ export class FeedbackService {
 
   constructor(
     @InjectRepository(FeedbackEntry) private readonly repo: Repository<FeedbackEntry>,
+    private readonly tenantService: TenantService,
   ) {}
 
   async create(dto: CreateFeedbackDto): Promise<FeedbackEntry> {
     const entry = this.repo.create({
       user_id: dto.user_id,
-      gym_id: dto.gym_id,
+      gym_id: this.tenantService.gymId,
       date: new Date(dto.date),
       effortLevel: dto.effort_level,
       energyLevel: dto.energy_level,
@@ -25,12 +27,15 @@ export class FeedbackService {
   }
 
   async findByUser(userId: string): Promise<FeedbackEntry[]> {
-    return this.repo.find({ where: { user_id: userId }, order: { date: 'DESC' } });
+    return this.repo.find({
+      where: { user_id: userId, gym_id: this.tenantService.gymId },
+      order: { date: 'DESC' },
+    });
   }
 
   async getLastN(userId: string, n: number): Promise<FeedbackEntry[]> {
     return this.repo.find({
-      where: { user_id: userId },
+      where: { user_id: userId, gym_id: this.tenantService.gymId },
       order: { date: 'DESC' },
       take: n,
     });
@@ -41,7 +46,7 @@ export class FeedbackService {
     const start = new Date();
     start.setDate(start.getDate() - days);
     return this.repo.count({
-      where: { user_id: userId, date: Between(start, end) },
+      where: { user_id: userId, gym_id: this.tenantService.gymId, date: Between(start, end) },
     });
   }
 

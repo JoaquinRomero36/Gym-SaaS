@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { Exercise } from './exercise.entity';
 import { CreateExerciseDto, UpdateExerciseDto } from './dto';
 
@@ -8,6 +9,7 @@ import { CreateExerciseDto, UpdateExerciseDto } from './dto';
 export class ExercisesService {
   constructor(
     @InjectRepository(Exercise) private readonly repo: Repository<Exercise>,
+    private readonly tenantService: TenantService,
   ) {}
 
   async create(dto: CreateExerciseDto): Promise<Exercise> {

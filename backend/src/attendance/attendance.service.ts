@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { AttendanceLog } from './attendance-log.entity';
 import { CreateAttendanceDto } from './dto';
 
@@ -10,12 +11,13 @@ export class AttendanceService {
 
   constructor(
     @InjectRepository(AttendanceLog) private readonly repo: Repository<AttendanceLog>,
+    private readonly tenantService: TenantService,
   ) {}
 
   async create(dto: CreateAttendanceDto): Promise<AttendanceLog> {
     const log = this.repo.create({
       user_id: dto.user_id,
-      gym_id: dto.gym_id,
+      gym_id: this.tenantService.gymId,
       date: new Date(dto.date),
       completed: dto.completed ?? false,
     });
@@ -23,19 +25,22 @@ export class AttendanceService {
   }
 
   async findByUser(userId: string): Promise<AttendanceLog[]> {
-    return this.repo.find({ where: { user_id: userId }, order: { date: 'DESC' } });
+    return this.repo.find({
+      where: { user_id: userId, gym_id: this.tenantService.gymId },
+      order: { date: 'DESC' },
+    });
   }
 
   async findInRange(userId: string, startDate: Date, endDate: Date): Promise<AttendanceLog[]> {
     return this.repo.find({
-      where: { user_id: userId, date: Between(startDate, endDate) },
+      where: { user_id: userId, gym_id: this.tenantService.gymId, date: Between(startDate, endDate) },
       order: { date: 'DESC' },
     });
   }
 
   async getLastAttendance(userId: string): Promise<AttendanceLog | null> {
     const logs = await this.repo.find({
-      where: { user_id: userId },
+      where: { user_id: userId, gym_id: this.tenantService.gymId },
       order: { date: 'DESC' },
       take: 1,
     });
@@ -47,7 +52,7 @@ export class AttendanceService {
     const start = new Date();
     start.setDate(start.getDate() - days);
     return this.repo.count({
-      where: { user_id: userId, date: Between(start, end), completed: true },
+      where: { user_id: userId, gym_id: this.tenantService.gymId, date: Between(start, end), completed: true },
     });
   }
 }

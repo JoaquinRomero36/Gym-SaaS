@@ -4,8 +4,9 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 export class TenantGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
-    if (request.user?.gymId) {
-      request.gymId = request.user.gymId;
+    const user = request.user;
+    if (user?.gymId) {
+      request.gymId = user.gymId;
     }
     return true;
   }

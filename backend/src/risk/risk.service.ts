@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { RiskScore, RiskCategory } from './risk-score.entity';
 import { ChurnFeatures, ChurnResult } from './risk.types';
 import { AttendanceService } from '../attendance/attendance.service';
@@ -18,6 +19,7 @@ export class RiskService {
     @InjectRepository(RiskScore) private readonly repo: Repository<RiskScore>,
     private readonly attendanceService: AttendanceService,
     private readonly feedbackService: FeedbackService,
+    private readonly tenantService: TenantService,
     config: ConfigService,
   ) {
     this.highThreshold = config.get<number>('CHURN_THRESHOLD_HIGH', 0.7);
@@ -82,7 +84,9 @@ export class RiskService {
     const features = await this.calculateFeatures(user);
     const { score, category } = this.computeScore(features);
 
-    const existing = await this.repo.findOne({ where: { user_id: user.id } });
+    const existing = await this.repo.findOne({
+      where: { user_id: user.id, gym_id: this.tenantService.gymId },
+    });
     if (existing) {
       existing.score = score;
       existing.category = category;
@@ -92,7 +96,7 @@ export class RiskService {
       await this.repo.save(
         this.repo.create({
           user_id: user.id,
-          gym_id: user.gym_id,
+          gym_id: this.tenantService.gymId,
           score,
           category,
           features: features as any,
@@ -106,14 +110,14 @@ export class RiskService {
 
   async getLatest(userId: string): Promise<RiskScore | null> {
     const scores = await this.repo.find({
-      where: { user_id: userId },
+      where: { user_id: userId, gym_id: this.tenantService.gymId },
       order: { calculatedAt: 'DESC' },
       take: 1,
     });
     return scores[0] ?? null;
   }
 
-  async getFeatures(userId: string): Promise<ChurnFeatures | null> {
+  async getFeature(userId: string): Promise<ChurnFeatures | null> {
     const latest = await this.getLatest(userId);
     return (latest?.features ?? null) as unknown as ChurnFeatures | null;
   }

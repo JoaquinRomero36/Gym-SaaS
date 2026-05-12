@@ -1,19 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { Gym } from './gym.entity';
 
 @Injectable()
 export class GymsService {
-  constructor(@InjectRepository(Gym) private readonly repo: Repository<Gym>) {}
+  constructor(
+    @InjectRepository(Gym) private readonly repo: Repository<Gym>,
+    private readonly tenantService: TenantService,
+  ) {}
 
   async findAll(): Promise<Gym[]> {
-    return this.repo.find();
+    return this.repo.find({ where: { id: this.tenantService.gymId } });
   }
 
   async findOne(id: string): Promise<Gym> {
     const g = await this.repo.findOne({ where: { id } });
     if (!g) throw new NotFoundException(`Gym ${id} not found`);
+    if (g.id !== this.tenantService.gymId) {
+      throw new NotFoundException(`Gym ${id} not found in this tenant`);
+    }
     return g;
   }
 

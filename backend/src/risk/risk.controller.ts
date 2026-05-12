@@ -24,6 +24,6 @@ export class RiskController {
 
   @Get(':userId/features')
   async getFeatures(@Param('userId', ParseUUIDPipe) userId: string): Promise<ChurnFeatures | null> {
-    return this.riskService.getFeatures(userId);
+    return this.riskService.getFeature(userId);
   }
 }

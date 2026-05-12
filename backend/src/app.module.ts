@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
+import { TenantService } from './common/services/tenant.service';
 
 @Module({
   imports: [
@@ -48,9 +49,11 @@ import { TenantGuard } from './common/guards/tenant.guard';
     AuthModule,
   ],
   providers: [
+    TenantService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: TenantGuard },
   ],
+  exports: [TenantService],
 })
 export class AppModule {}

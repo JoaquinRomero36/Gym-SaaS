@@ -3,13 +3,17 @@ import {
   ParseUUIDPipe, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
+import { TenantService } from '../common/services/tenant.service';
 import { CoachesService } from './coaches.service';
 import { CreateCoachDto, UpdateCoachDto } from './dto';
 import { Coach } from './coach.entity';
 
 @Controller('coaches')
 export class CoachesController {
-  constructor(private readonly service: CoachesService) {}
+  constructor(
+    private readonly service: CoachesService,
+    private readonly tenantService: TenantService,
+  ) {}
 
   @Post()
   @Roles('admin')
@@ -19,7 +23,7 @@ export class CoachesController {
 
   @Get()
   async findAll(@Query('gym_id') gymId?: string): Promise<Coach[]> {
-    return gymId ? this.service.findAllByGym(gymId) : this.service.findAll();
+    return this.service.findAll();
   }
 
   @Get(':id')

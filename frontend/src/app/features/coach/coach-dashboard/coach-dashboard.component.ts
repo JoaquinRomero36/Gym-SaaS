@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/auth.service';
 
 @Component({
   selector: 'app-coach-dashboard',
@@ -48,5 +49,7 @@ import { RouterLink } from '@angular/router';
 })
 export class CoachDashboardComponent {
   private http = inject(HttpClient);
-  members = toSignal(this.http.get<any[]>('/api/v1/users'), { initialValue: [] });
+  private auth = inject(AuthService);
+  userId = this.auth.user()?.id;
+  members = toSignal(this.http.get<any[]>(`/api/v1/users?coach_id=${this.userId}`), { initialValue: [] });
 }

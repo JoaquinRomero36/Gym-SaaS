@@ -6,6 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Gym } from '../gyms/gym.entity';
 import { User } from '../users/user.entity';
@@ -20,6 +21,7 @@ export class Coach {
   gym!: Gym;
 
   @Column({ name: 'gym_id' })
+  @Index()
   gym_id!: string;
 
   @Column()

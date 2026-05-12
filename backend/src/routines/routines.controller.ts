@@ -18,15 +18,8 @@ export class RoutinesController {
   }
 
   @Get()
-  async findAll(
-    @Query('gym_id') gymId?: string,
-    @Query('user_id') userId?: string,
-    @Query('coach_id') coachId?: string,
-  ): Promise<Routine[]> {
-    if (userId) return this.service.findAllByUser(userId);
-    if (coachId) return this.service.findAllByCoach(coachId);
-    if (gymId) return this.service.findAllByGym(gymId);
-    return [];
+  async findAll(): Promise<Routine[]> {
+    return this.service.findAllByGym();
   }
 
   @Get(':id')

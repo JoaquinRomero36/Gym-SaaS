@@ -1,29 +1,33 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { User, UserLevel, UserStatus } from './user.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private readonly repo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly repo: Repository<User>,
+    private readonly tenantService: TenantService,
+  ) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.repo.findOne({ where: { email } });
+    return this.repo.findOne({ where: { email, gym_id: this.tenantService.gymId } });
   }
 
   async findOne(id: string): Promise<User> {
-    const u = await this.repo.findOne({ where: { id } });
+    const u = await this.repo.findOne({ where: { id, gym_id: this.tenantService.gymId } });
     if (!u) throw new NotFoundException(`User ${id} not found`);
     return u;
   }
 
   async findAllByGym(gymId: string): Promise<User[]> {
-    return this.repo.find({ where: { gym_id: gymId } });
+    return this.repo.find({ where: { gym_id: this.tenantService.gymId } });
   }
 
   async findAllByCoach(coachId: string): Promise<User[]> {
-    return this.repo.find({ where: { coach_id: coachId } });
+    return this.repo.find({ where: { coach_id: coachId, gym_id: this.tenantService.gymId } });
   }
 
   async create(data: {

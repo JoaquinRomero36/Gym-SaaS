@@ -2,7 +2,6 @@ import { IsUUID, IsNotEmpty, IsBoolean, IsDateString, IsOptional } from 'class-v
 
 export class CreateAttendanceDto {
   @IsUUID() @IsNotEmpty() user_id!: string;
-  @IsUUID() @IsNotEmpty() gym_id!: string;
   @IsDateString() @IsNotEmpty() date!: string;
   @IsOptional() @IsBoolean() completed?: boolean;
 }

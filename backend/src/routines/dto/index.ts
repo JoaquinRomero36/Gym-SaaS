@@ -1,10 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateRoutineDto {
-  @IsUUID()
-  @IsNotEmpty()
-  gym_id!: string;
-
   @IsOptional()
   @IsUUID()
   coach_id?: string;

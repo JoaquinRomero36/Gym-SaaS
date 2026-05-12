@@ -11,7 +11,7 @@ export interface AuthTokens {
 }
 
 export interface AuthResponse extends AuthTokens {
-  user: { id: string; email: string; name: string; role: string; gym_id: string };
+  user: { id: string; email: string; name: string; role: string; gymId: string };
 }
 
 @Injectable()
@@ -48,8 +48,8 @@ export class AuthService {
       const access_token = this.jwtService.sign({
         sub: user.id,
         email: user.email,
-        role: payload.role,
-        gym_id: user.gym_id,
+        role: payload.role as string,
+        gymId: user.gym_id,
       });
       return { access_token };
     } catch {
@@ -58,7 +58,7 @@ export class AuthService {
   }
 
   private buildResponse(user: User, role: string): AuthResponse {
-    const payload = { sub: user.id, email: user.email, role, gym_id: user.gym_id };
+    const payload = { sub: user.id, email: user.email, role, gymId: user.gym_id };
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -71,7 +71,7 @@ export class AuthService {
         email: user.email,
         name: user.name,
         role,
-        gym_id: user.gym_id,
+        gymId: user.gym_id,
       },
     };
   }
