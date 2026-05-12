@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 4200;
-const API_TARGET = 'http://localhost:3000';
+const API_TARGET = process.env.API_TARGET || 'http://backend:3000';
 const DIST = path.join(__dirname, 'dist', 'gym-frontend', 'browser');
 
 const server = http.createServer((req, res) => {
