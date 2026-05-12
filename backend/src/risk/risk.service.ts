@@ -160,6 +160,12 @@ export class RiskService {
     return scores[0] ?? null;
   }
 
+  async getScoresByGym(gymId: string, category?: RiskCategory): Promise<RiskScore[]> {
+    const where: any = { gym_id: gymId };
+    if (category) where.category = category;
+    return this.repo.find({ where, order: { calculatedAt: 'DESC' } });
+  }
+
   async getFeature(userId: string): Promise<ChurnFeatures | null> {
     const latest = await this.getLatest(userId);
     return (latest?.features ?? null) as unknown as ChurnFeatures | null;

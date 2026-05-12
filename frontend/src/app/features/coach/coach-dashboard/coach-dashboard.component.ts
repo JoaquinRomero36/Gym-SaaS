@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -15,6 +15,30 @@ import { AuthService } from '../../../core/auth.service';
         <p class="page-subtitle">{{ members().length }} miembros asignados</p>
       </div>
 
+      <div class="grid-3" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#eef2ff;color:#4f46e5">👥</div>
+          <div>
+            <div class="stat-value" style="color:#4f46e5">{{ members().length }}</div>
+            <div class="stat-label">Total miembros</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#eff6ff;color:#2563eb">✅</div>
+          <div>
+            <div class="stat-value" style="color:#2563eb">{{ activeMembers() }}</div>
+            <div class="stat-label">Activos</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef2f2;color:#dc2626">⚠️</div>
+          <div>
+            <div class="stat-value" style="color:#dc2626">{{ highRiskCount() }}</div>
+            <div class="stat-label">Alto riesgo</div>
+          </div>
+        </div>
+      </div>
+
       @if (members().length === 0) {
         <div class="empty-state">
           <span class="empty-icon">👥</span>
@@ -22,6 +46,52 @@ import { AuthService } from '../../../core/auth.service';
           <p class="empty-text">Aún no tenés miembros asignados.</p>
         </div>
       }
+      <div style="display:flex;flex-direction:column;gap:8px">
+        @for (m of members(); track m.id) {
+          <a [routerLink]="['/coach/members', m.id]" class="member-card">
+            <div style="display:flex;align-items:center;gap:16px">
+              <div class="avatar" style="background:#eef2ff;color:#4f46e5">{{ m.name.charAt(0) }}</div>
+              <div>
+                <div style="font-weight:600;font-size:14px;margin-bottom:2px">{{ m.name }}</div>
+                <div style="font-size:13px;color:var(--color-text-secondary)">{{ m.email }} · {{ m.level }}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span class="badge" [class.badge-success]="m.status === 'active'" [class.badge-danger]="m.status !== 'active'">
+                {{ m.status }}
+              </span>
+              <span *ngIf="memberRisk(m)" class="badge" [class.badge-danger]="memberRisk(m) >= 0.7" [class.badge-warning]="memberRisk(m) < 0.7 && memberRisk(m) >= 0.4" style="font-size:11px;margin-right:4px">
+                riesgo: {{ (memberRisk(m) * 100).toFixed(0) }}%
+              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                <path d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+  `,
+})
+export class CoachDashboardComponent {
+  private http = inject(HttpClient);
+  private auth = inject(AuthService);
+  userId = this.auth.user()?.id;
+  members = toSignal(this.http.get<any[]>(`/api/v1/users?coach_id=${this.userId}`), { initialValue: [] });
+  risks = toSignal(this.http.get<any[]>(`/api/v1/risk`), { initialValue: [] });
+
+  activeMembers = computed(() => this.members().filter((m: any) => m.status === 'active').length);
+
+  highRiskCount = computed(() => {
+    const memberIds = new Set(this.members().map((m: any) => m.id));
+    return this.risks().filter((r: any) => r.category === 'high' && memberIds.has(r.user_id)).length;
+  });
+
+  memberRisk = (member: any): number | null => {
+    const r = this.risks().find((r: any) => r.user_id === member.id && r.gym_id === member.gym_id);
+    return r ? r.score : null;
+  };
+}
 
       <div style="display:flex;flex-direction:column;gap:8px">
         @for (m of members(); track m.id) {

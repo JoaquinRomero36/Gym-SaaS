@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth.service';
@@ -12,6 +12,19 @@ import { AuthService } from '../../../core/auth.service';
         <h1 class="page-title">Mi Rutina</h1>
         <p class="page-subtitle">Ejercicios asignados para hoy</p>
       </div>
+
+      @if (completed.value) {
+        <div class="card" style="border-left:4px solid #059669;background:#ecfdf5">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:28px">🎉</span>
+            <div>
+              <div style="font-weight:600;font-size:15px;color:#059669">¡Sesión completada!</div>
+              <div style="font-size:13px;color:var(--color-text-secondary)">Has registrado tu asistencia de hoy.</div>
+            </div>
+          </div>
+        </div>
+        <br>
+      }
 
       @if (routines().length === 0) {
         <div class="empty-state">
@@ -43,7 +56,13 @@ import { AuthService } from '../../../core/auth.service';
           </div>
 
           <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-light);display:flex;justify-content:flex-end">
-            <button class="btn btn-primary">Completar sesión</button>
+            <button class="btn btn-primary" (click)="completeSession()" [disabled]="saving()" style="opacity:saving() ? 0.6 : 1">
+              @if (!saving()) {
+                Completar sesión
+              } @else {
+                Registrando...
+              }
+            </button>
           </div>
         </div>
       }
@@ -55,4 +74,25 @@ export class MemberRoutineComponent {
   private auth = inject(AuthService);
   userId = this.auth.user()?.id;
   routines = toSignal(this.http.get<any[]>(`/api/v1/routines?user_id=${this.userId}`), { initialValue: [] });
+  completed = signal(false);
+  saving = signal(false);
+
+  completeSession() {
+    this.saving.set(true);
+    const today = new Date().toISOString().split('T')[0];
+    this.http.post('/api/v1/attendance', {
+      user_id: this.userId,
+      date: today,
+      completed: true,
+    }).subscribe({
+      next: () => {
+        this.completed.set(true);
+        this.saving.set(false);
+      },
+      error: () => {
+        this.saving.set(false);
+        alert('Error al registrar la asistencia. Inténtalo de nuevo.');
+      },
+    });
+  }
 }

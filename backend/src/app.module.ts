@@ -14,6 +14,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { RiskModule } from './risk/risk.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuthModule } from './auth/auth.module';
+import { StatsModule } from './stats/stats.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
@@ -50,6 +51,7 @@ import { AiClientService } from './common/services/ai-client.service';
     RiskModule,
     NotificationsModule,
     AuthModule,
+    StatsModule,
   ],
   providers: [
     TenantService,

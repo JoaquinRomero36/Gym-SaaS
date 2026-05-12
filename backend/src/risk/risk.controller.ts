@@ -1,14 +1,16 @@
-import { Controller, Get, Post, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Query, Param, ParseUUIDPipe } from '@nestjs/common';
 import { RiskService } from './risk.service';
-import { RiskScore } from './risk-score.entity';
+import { RiskScore, RiskCategory } from './risk-score.entity';
 import { ChurnFeatures, ChurnResult } from './risk.types';
 import { UsersService } from '../users/users.service';
+import { TenantService } from '../common/services/tenant.service';
 
 @Controller('risk')
 export class RiskController {
   constructor(
     private readonly riskService: RiskService,
     private readonly usersService: UsersService,
+    private readonly tenantService: TenantService,
   ) {}
 
   @Post('calculate/:userId')
@@ -25,5 +27,11 @@ export class RiskController {
   @Get(':userId/features')
   async getFeatures(@Param('userId', ParseUUIDPipe) userId: string): Promise<ChurnFeatures | null> {
     return this.riskService.getFeature(userId);
+  }
+
+  @Get('all')
+  async getAllScores(@Query('category') category?: RiskCategory): Promise<RiskScore[]> {
+    const gymId = this.tenantService.gymId;
+    return this.riskService.getScoresByGym(gymId, category);
   }
 }

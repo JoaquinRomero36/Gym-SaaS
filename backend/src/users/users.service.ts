@@ -30,6 +30,10 @@ export class UsersService {
     return this.repo.find({ where: { coach_id: coachId, gym_id: this.tenantService.gymId } });
   }
 
+  async findAllByRole(role: string, gymId: string): Promise<User[]> {
+    return this.repo.find({ where: { role: role as any, gym_id: gymId } });
+  }
+
   async create(data: {
     gym_id: string; name: string; email: string; password: string;
     coach_id?: string | null; level?: string; role?: string;

@@ -25,8 +25,15 @@ export class UsersController {
   @Get()
   @Roles('admin', 'coach')
   async findAll(
-    @Query('gym_id') gymId?: string,
+    @Query('coach_id') coachId?: string,
+    @Query('role') role?: string,
   ): Promise<User[]> {
+    if (coachId) {
+      return this.service.findAllByCoach(coachId);
+    }
+    if (role) {
+      return this.service.findAllByRole(role, this.tenantService.gymId);
+    }
     return this.service.findAllByGym(this.tenantService.gymId);
   }
 
