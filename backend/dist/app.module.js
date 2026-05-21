@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
+const axios_1 = require("@nestjs/axios");
 const health_module_1 = require("./health/health.module");
 const gyms_module_1 = require("./gyms/gyms.module");
 const users_module_1 = require("./users/users.module");
@@ -22,6 +23,8 @@ const feedback_module_1 = require("./feedback/feedback.module");
 const risk_module_1 = require("./risk/risk.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const auth_module_1 = require("./auth/auth.module");
+const stats_module_1 = require("./stats/stats.module");
+const common_module_1 = require("./common/common.module");
 const jwt_auth_guard_1 = require("./common/guards/jwt-auth.guard");
 const roles_guard_1 = require("./common/guards/roles.guard");
 const tenant_guard_1 = require("./common/guards/tenant.guard");
@@ -32,6 +35,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.local'] }),
+            axios_1.HttpModule,
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
@@ -47,6 +51,7 @@ exports.AppModule = AppModule = __decorate([
                     logging: config.get('NODE_ENV') === 'development',
                 }),
             }),
+            common_module_1.CommonModule,
             health_module_1.HealthModule,
             gyms_module_1.GymsModule,
             users_module_1.UsersModule,
@@ -58,6 +63,7 @@ exports.AppModule = AppModule = __decorate([
             risk_module_1.RiskModule,
             notifications_module_1.NotificationsModule,
             auth_module_1.AuthModule,
+            stats_module_1.StatsModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },

@@ -15,21 +15,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
+const tenant_service_1 = require("../common/services/tenant.service");
 const users_service_1 = require("./users.service");
 const dto_1 = require("./dto");
 let UsersController = class UsersController {
-    constructor(service) {
+    constructor(service, tenantService) {
         this.service = service;
+        this.tenantService = tenantService;
     }
     async create(dto) {
         return this.service.create(dto);
     }
-    async findAll(gymId, coachId) {
-        if (coachId)
+    async findAll(coachId, role) {
+        if (coachId) {
             return this.service.findAllByCoach(coachId);
-        if (gymId)
-            return this.service.findAllByGym(gymId);
-        return [];
+        }
+        if (role) {
+            return this.service.findAllByRole(role, this.tenantService.gymId);
+        }
+        return this.service.findAllByGym(this.tenantService.gymId);
     }
     async findOne(id) {
         return this.service.findOne(id);
@@ -53,8 +57,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, roles_decorator_1.Roles)('admin', 'coach'),
-    __param(0, (0, common_1.Query)('gym_id')),
-    __param(1, (0, common_1.Query)('coach_id')),
+    __param(0, (0, common_1.Query)('coach_id')),
+    __param(1, (0, common_1.Query)('role')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
@@ -87,6 +91,7 @@ __decorate([
 ], UsersController.prototype, "remove", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        tenant_service_1.TenantService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

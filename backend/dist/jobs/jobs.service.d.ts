@@ -19,6 +19,7 @@ export declare class JobsService {
     dailyChurnPrediction(): Promise<void>;
     triggerSinglePrediction(userId: string): Promise<void>;
     triggerMessaging(userId: string, trigger: string): Promise<void>;
+    private readonly BATCH_SIZE;
     processBatch(): Promise<void>;
     processSingle(userId: string): Promise<void>;
     processMessage(userId: string, trigger: string): Promise<void>;

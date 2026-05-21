@@ -40,6 +40,7 @@ export class LayoutComponent {
       { label: 'Nueva Rutina', route: '/coach/routines/create', icon: '➕' },
     ];
     return [
+      { label: 'Dashboard', route: '/member/dashboard', icon: '📊' },
       { label: 'Mi Rutina', route: '/member/routine', icon: '💪' },
       { label: 'Feedback', route: '/member/feedback', icon: '⭐' },
       { label: 'Progreso', route: '/member/progress', icon: '📈' },

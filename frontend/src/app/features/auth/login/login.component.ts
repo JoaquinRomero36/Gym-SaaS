@@ -76,7 +76,7 @@ export class LoginComponent {
       next: (res: AuthResponse) => {
         this.loading.set(false);
         const role = res.user.role;
-        this.router.navigate([`/${role === 'member' ? 'member/routine' : role + '/dashboard'}`]);
+        this.router.navigate([`/${role === 'member' ? 'member/dashboard' : role + '/dashboard'}`]);
       },
       error: () => {
         this.loading.set(false);

@@ -1,12 +1,15 @@
 import { Repository } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { User } from './user.entity';
 export declare class UsersService {
     private readonly repo;
-    constructor(repo: Repository<User>);
+    private readonly tenantService;
+    constructor(repo: Repository<User>, tenantService: TenantService);
     findByEmail(email: string): Promise<User | null>;
     findOne(id: string): Promise<User>;
     findAllByGym(gymId: string): Promise<User[]>;
     findAllByCoach(coachId: string): Promise<User[]>;
+    findAllByRole(role: string, gymId: string): Promise<User[]>;
     create(data: {
         gym_id: string;
         name: string;

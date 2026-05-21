@@ -20,11 +20,6 @@ __decorate([
     __metadata("design:type", String)
 ], CreateFeedbackDto.prototype, "user_id", void 0);
 __decorate([
-    (0, class_validator_1.IsUUID)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreateFeedbackDto.prototype, "gym_id", void 0);
-__decorate([
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)

@@ -37,6 +37,7 @@ let JobsService = JobsService_1 = class JobsService {
         this.notificationsService = notificationsService;
         this.httpService = httpService;
         this.logger = new common_1.Logger(JobsService_1.name);
+        this.BATCH_SIZE = 100;
         this.aiServiceUrl = config.get('AI_SERVICE_URL', 'http://localhost:8000');
     }
     async dailyChurnPrediction() {
@@ -50,24 +51,41 @@ let JobsService = JobsService_1 = class JobsService {
         await this.messagingQueue.add('send', { userId, trigger }, { removeOnComplete: { age: 3600 }, removeOnFail: { age: 3600 * 24 } });
     }
     async processBatch() {
-        const activeUsers = await this.userRepo.find({
-            where: { status: user_entity_1.UserStatus.ACTIVE },
-        });
-        this.logger.log(`Processing batch for ${activeUsers.length} users`);
-        for (const user of activeUsers) {
-            try {
-                const result = await this.riskService.calculateForUser(user);
-                if (result.category === 'high') {
-                    await this.coachAlertQueue.add('alert', { userId: user.id, score: result.score, gymId: user.gym_id }, { removeOnComplete: { age: 3600 * 24 } });
+        let processed = 0;
+        let cursor;
+        let page = 0;
+        this.logger.log('🏋️ Starting paginated batch churn prediction');
+        while (true) {
+            const where = { status: user_entity_1.UserStatus.ACTIVE };
+            if (cursor)
+                where.id = (0, typeorm_2.MoreThan)(cursor);
+            const users = await this.userRepo.find({
+                where,
+                order: { id: 'ASC' },
+                take: this.BATCH_SIZE,
+            });
+            if (users.length === 0)
+                break;
+            page++;
+            this.logger.log(`Page ${page}: ${users.length} users (cursor: ${cursor?.slice(0, 8) ?? 'start'})`);
+            for (const user of users) {
+                try {
+                    const result = await this.riskService.calculateForUserBatch(user, user.gym_id);
+                    if (result.category === 'high') {
+                        await this.coachAlertQueue.add('alert', { userId: user.id, score: result.score, gymId: user.gym_id }, { removeOnComplete: { age: 3600 * 24 } });
+                    }
+                    if (result.category === 'high' || result.category === 'medium') {
+                        await this.triggerMessaging(user.id, result.category);
+                    }
                 }
-                if (result.category === 'high' || result.category === 'medium') {
-                    await this.triggerMessaging(user.id, result.category);
+                catch (err) {
+                    this.logger.error(`Batch error for user ${user.id}:`, err);
                 }
             }
-            catch (err) {
-                this.logger.error(`Batch error for user ${user.id}:`, err);
-            }
+            processed += users.length;
+            cursor = users[users.length - 1].id;
         }
+        this.logger.log(`✅ Batch complete: ${processed} total users processed in ${page} pages`);
     }
     async processSingle(userId) {
         const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -79,7 +97,7 @@ let JobsService = JobsService_1 = class JobsService {
     }
     async processMessage(userId, trigger) {
         try {
-            const features = await this.riskService.getFeatures(userId);
+            const features = await this.riskService.getFeature(userId);
             if (!features) {
                 this.logger.warn(`No features for user ${userId}`);
                 return;
@@ -95,7 +113,6 @@ let JobsService = JobsService_1 = class JobsService {
             }));
             await this.notificationsService.create({
                 user_id: userId,
-                gym_id: user.gym_id,
                 channel: 'in-app',
                 message: data.message,
                 trigger: trigger,
@@ -112,7 +129,6 @@ let JobsService = JobsService_1 = class JobsService {
             return;
         await this.notificationsService.create({
             user_id: user.coach_id,
-            gym_id: gymId,
             channel: 'in-app',
             message: `⚠️ Alerta: ${user.name} tiene alto riesgo de abandono (score: ${score.toFixed(2)})`,
             trigger: 'high_risk',

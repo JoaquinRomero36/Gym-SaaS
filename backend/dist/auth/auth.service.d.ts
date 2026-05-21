@@ -12,7 +12,7 @@ export interface AuthResponse extends AuthTokens {
         email: string;
         name: string;
         role: string;
-        gym_id: string;
+        gymId: string;
     };
 }
 export declare class AuthService {

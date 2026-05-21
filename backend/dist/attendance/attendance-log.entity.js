@@ -27,6 +27,7 @@ __decorate([
 ], AttendanceLog.prototype, "user", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'user_id' }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], AttendanceLog.prototype, "user_id", void 0);
 __decorate([
@@ -36,6 +37,7 @@ __decorate([
 ], AttendanceLog.prototype, "gym", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'gym_id' }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], AttendanceLog.prototype, "gym_id", void 0);
 __decorate([

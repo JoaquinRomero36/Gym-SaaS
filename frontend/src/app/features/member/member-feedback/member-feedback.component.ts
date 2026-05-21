@@ -77,7 +77,7 @@ export class MemberFeedbackComponent {
     const user = this.auth.user();
     if (!user) return;
     this.http.post('/api/v1/feedback', {
-      user_id: user.id, gym_id: user.gym_id,
+      user_id: user.id,
       date: new Date().toISOString().split('T')[0],
       effort_level: this.effort(),
       energy_level: this.energy(),

@@ -1,9 +1,11 @@
 import { Repository } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { Exercise } from './exercise.entity';
 import { CreateExerciseDto, UpdateExerciseDto } from './dto';
 export declare class ExercisesService {
     private readonly repo;
-    constructor(repo: Repository<Exercise>);
+    private readonly tenantService;
+    constructor(repo: Repository<Exercise>, tenantService: TenantService);
     create(dto: CreateExerciseDto): Promise<Exercise>;
     createMany(dtos: CreateExerciseDto[]): Promise<Exercise[]>;
     findByRoutine(routineId: string): Promise<Exercise[]>;

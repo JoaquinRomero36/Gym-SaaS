@@ -15,17 +15,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoachesController = void 0;
 const common_1 = require("@nestjs/common");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
+const tenant_service_1 = require("../common/services/tenant.service");
 const coaches_service_1 = require("./coaches.service");
 const dto_1 = require("./dto");
 let CoachesController = class CoachesController {
-    constructor(service) {
+    constructor(service, tenantService) {
         this.service = service;
+        this.tenantService = tenantService;
     }
     async create(dto) {
         return this.service.create(dto);
     }
     async findAll(gymId) {
-        return gymId ? this.service.findAllByGym(gymId) : this.service.findAll();
+        return this.service.findAll();
     }
     async findOne(id) {
         return this.service.findOne(id);
@@ -80,6 +82,7 @@ __decorate([
 ], CoachesController.prototype, "remove", null);
 exports.CoachesController = CoachesController = __decorate([
     (0, common_1.Controller)('coaches'),
-    __metadata("design:paramtypes", [coaches_service_1.CoachesService])
+    __metadata("design:paramtypes", [coaches_service_1.CoachesService,
+        tenant_service_1.TenantService])
 ], CoachesController);
 //# sourceMappingURL=coaches.controller.js.map

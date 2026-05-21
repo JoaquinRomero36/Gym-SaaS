@@ -17,44 +17,52 @@ exports.AttendanceService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const attendance_log_entity_1 = require("./attendance-log.entity");
 let AttendanceService = AttendanceService_1 = class AttendanceService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
         this.logger = new common_1.Logger(AttendanceService_1.name);
     }
-    async create(dto) {
+    getGymId(explicitGymId) {
+        return explicitGymId || this.tenantService.gymId;
+    }
+    async create(dto, gymId) {
         const log = this.repo.create({
             user_id: dto.user_id,
-            gym_id: dto.gym_id,
+            gym_id: this.getGymId(gymId),
             date: new Date(dto.date),
             completed: dto.completed ?? false,
         });
         return this.repo.save(log);
     }
-    async findByUser(userId) {
-        return this.repo.find({ where: { user_id: userId }, order: { date: 'DESC' } });
-    }
-    async findInRange(userId, startDate, endDate) {
+    async findByUser(userId, gymId) {
         return this.repo.find({
-            where: { user_id: userId, date: (0, typeorm_2.Between)(startDate, endDate) },
+            where: { user_id: userId, gym_id: this.getGymId(gymId) },
             order: { date: 'DESC' },
         });
     }
-    async getLastAttendance(userId) {
+    async findInRange(userId, startDate, endDate, gymId) {
+        return this.repo.find({
+            where: { user_id: userId, gym_id: this.getGymId(gymId), date: (0, typeorm_2.Between)(startDate, endDate) },
+            order: { date: 'DESC' },
+        });
+    }
+    async getLastAttendance(userId, gymId) {
         const logs = await this.repo.find({
-            where: { user_id: userId },
+            where: { user_id: userId, gym_id: this.getGymId(gymId) },
             order: { date: 'DESC' },
             take: 1,
         });
         return logs[0] ?? null;
     }
-    async countInRange(userId, days) {
+    async countInRange(userId, days, gymId) {
         const end = new Date();
         const start = new Date();
         start.setDate(start.getDate() - days);
         return this.repo.count({
-            where: { user_id: userId, date: (0, typeorm_2.Between)(start, end), completed: true },
+            where: { user_id: userId, gym_id: this.getGymId(gymId), date: (0, typeorm_2.Between)(start, end), completed: true },
         });
     }
 };
@@ -62,6 +70,7 @@ exports.AttendanceService = AttendanceService;
 exports.AttendanceService = AttendanceService = AttendanceService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(attendance_log_entity_1.AttendanceLog)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], AttendanceService);
 //# sourceMappingURL=attendance.service.js.map

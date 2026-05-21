@@ -49,24 +49,26 @@ exports.CoachesService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const coach_entity_1 = require("./coach.entity");
 const bcrypt = __importStar(require("bcrypt"));
 let CoachesService = class CoachesService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
     }
     async create(data) {
         const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : undefined;
-        return this.repo.save(this.repo.create({ ...data, passwordHash }));
+        return this.repo.save(this.repo.create({ ...data, passwordHash, gym_id: this.tenantService.gymId }));
     }
     async findAll() {
-        return this.repo.find();
+        return this.repo.find({ where: { gym_id: this.tenantService.gymId } });
     }
     async findAllByGym(gymId) {
-        return this.repo.find({ where: { gym_id: gymId } });
+        return this.repo.find({ where: { gym_id: this.tenantService.gymId } });
     }
     async findOne(id) {
-        const c = await this.repo.findOne({ where: { id } });
+        const c = await this.repo.findOne({ where: { id, gym_id: this.tenantService.gymId } });
         if (!c)
             throw new common_1.NotFoundException(`Coach ${id} not found`);
         return c;
@@ -83,6 +85,7 @@ exports.CoachesService = CoachesService;
 exports.CoachesService = CoachesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(coach_entity_1.Coach)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], CoachesService);
 //# sourceMappingURL=coaches.service.js.map

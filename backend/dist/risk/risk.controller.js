@@ -15,11 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RiskController = void 0;
 const common_1 = require("@nestjs/common");
 const risk_service_1 = require("./risk.service");
+const risk_score_entity_1 = require("./risk-score.entity");
 const users_service_1 = require("../users/users.service");
+const tenant_service_1 = require("../common/services/tenant.service");
 let RiskController = class RiskController {
-    constructor(riskService, usersService) {
+    constructor(riskService, usersService, tenantService) {
         this.riskService = riskService;
         this.usersService = usersService;
+        this.tenantService = tenantService;
     }
     async calculate(userId) {
         const user = await this.usersService.findOne(userId);
@@ -29,7 +32,11 @@ let RiskController = class RiskController {
         return this.riskService.getLatest(userId);
     }
     async getFeatures(userId) {
-        return this.riskService.getFeatures(userId);
+        return this.riskService.getFeature(userId);
+    }
+    async getAllScores(category) {
+        const gymId = this.tenantService.gymId;
+        return this.riskService.getScoresByGym(gymId, category);
     }
 };
 exports.RiskController = RiskController;
@@ -54,9 +61,17 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], RiskController.prototype, "getFeatures", null);
+__decorate([
+    (0, common_1.Get)('all'),
+    __param(0, (0, common_1.Query)('category')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], RiskController.prototype, "getAllScores", null);
 exports.RiskController = RiskController = __decorate([
     (0, common_1.Controller)('risk'),
     __metadata("design:paramtypes", [risk_service_1.RiskService,
-        users_service_1.UsersService])
+        users_service_1.UsersService,
+        tenant_service_1.TenantService])
 ], RiskController);
 //# sourceMappingURL=risk.controller.js.map

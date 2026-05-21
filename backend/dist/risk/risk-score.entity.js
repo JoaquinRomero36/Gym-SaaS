@@ -33,6 +33,7 @@ __decorate([
 ], RiskScore.prototype, "user", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'user_id' }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], RiskScore.prototype, "user_id", void 0);
 __decorate([
@@ -42,6 +43,7 @@ __decorate([
 ], RiskScore.prototype, "gym", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'gym_id' }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], RiskScore.prototype, "gym_id", void 0);
 __decorate([
@@ -54,10 +56,12 @@ __decorate([
         enum: RiskCategory,
         default: RiskCategory.LOW,
     }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], RiskScore.prototype, "category", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'calculated_at' }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", Date)
 ], RiskScore.prototype, "calculatedAt", void 0);
 __decorate([

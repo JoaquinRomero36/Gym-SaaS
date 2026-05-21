@@ -47,6 +47,7 @@ __decorate([
 ], Notification.prototype, "user", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'user_id' }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], Notification.prototype, "user_id", void 0);
 __decorate([
@@ -56,6 +57,7 @@ __decorate([
 ], Notification.prototype, "gym", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'gym_id' }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], Notification.prototype, "gym_id", void 0);
 __decorate([

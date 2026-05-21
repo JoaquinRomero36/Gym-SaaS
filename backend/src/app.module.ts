@@ -15,11 +15,10 @@ import { RiskModule } from './risk/risk.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuthModule } from './auth/auth.module';
 import { StatsModule } from './stats/stats.module';
+import { CommonModule } from './common/common.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
-import { TenantService } from './common/services/tenant.service';
-import { AiClientService } from './common/services/ai-client.service';
 
 @Module({
   imports: [
@@ -40,6 +39,7 @@ import { AiClientService } from './common/services/ai-client.service';
         logging: config.get('NODE_ENV') === 'development',
       }),
     }),
+    CommonModule,
     HealthModule,
     GymsModule,
     UsersModule,
@@ -54,12 +54,9 @@ import { AiClientService } from './common/services/ai-client.service';
     StatsModule,
   ],
   providers: [
-    TenantService,
-    AiClientService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: TenantGuard },
   ],
-  exports: [TenantService, AiClientService],
 })
 export class AppModule {}

@@ -13,7 +13,7 @@ import { AuthService } from '../../../core/auth.service';
         <p class="page-subtitle">Ejercicios asignados para hoy</p>
       </div>
 
-      @if (completed.value) {
+      @if (completed()) {
         <div class="card" style="border-left:4px solid #059669;background:#ecfdf5">
           <div style="display:flex;align-items:center;gap:12px">
             <span style="font-size:28px">🎉</span>

@@ -16,25 +16,39 @@ exports.RoutinesService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const routine_entity_1 = require("./routine.entity");
 let RoutinesService = class RoutinesService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
     }
     async create(dto) {
-        return this.repo.save(this.repo.create(dto));
+        return this.repo.save(this.repo.create({
+            ...dto,
+            gym_id: this.tenantService.gymId,
+        }));
     }
-    async findAllByGym(gymId) {
-        return this.repo.find({ where: { gym_id: gymId }, relations: ['exercises'] });
+    async findAllByGym() {
+        return this.repo.find({ where: { gym_id: this.tenantService.gymId }, relations: ['exercises'] });
     }
     async findAllByUser(userId) {
-        return this.repo.find({ where: { user_id: userId }, relations: ['exercises'] });
+        return this.repo.find({
+            where: { user_id: userId, gym_id: this.tenantService.gymId },
+            relations: ['exercises'],
+        });
     }
     async findAllByCoach(coachId) {
-        return this.repo.find({ where: { coach_id: coachId }, relations: ['exercises'] });
+        return this.repo.find({
+            where: { coach_id: coachId, gym_id: this.tenantService.gymId },
+            relations: ['exercises'],
+        });
     }
     async findOne(id) {
-        const r = await this.repo.findOne({ where: { id }, relations: ['exercises'] });
+        const r = await this.repo.findOne({
+            where: { id, gym_id: this.tenantService.gymId },
+            relations: ['exercises'],
+        });
         if (!r)
             throw new common_1.NotFoundException(`Routine ${id} not found`);
         return r;
@@ -51,6 +65,7 @@ exports.RoutinesService = RoutinesService;
 exports.RoutinesService = RoutinesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(routine_entity_1.Routine)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], RoutinesService);
 //# sourceMappingURL=routines.service.js.map

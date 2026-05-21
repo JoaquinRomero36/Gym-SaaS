@@ -1,8 +1,10 @@
 import { Repository } from 'typeorm';
+import { TenantService } from '../common/services/tenant.service';
 import { Coach } from './coach.entity';
 export declare class CoachesService {
     private readonly repo;
-    constructor(repo: Repository<Coach>);
+    private readonly tenantService;
+    constructor(repo: Repository<Coach>, tenantService: TenantService);
     create(data: {
         name: string;
         email: string;

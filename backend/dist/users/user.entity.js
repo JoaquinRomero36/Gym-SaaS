@@ -62,6 +62,7 @@ __decorate([
 ], User.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
@@ -85,17 +86,18 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "level", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: 'joined_at' }),
-    __metadata("design:type", Date)
-], User.prototype, "joinedAt", void 0);
-__decorate([
     (0, typeorm_1.Column)({
         type: 'enum',
         enum: UserStatus,
         default: UserStatus.ACTIVE,
     }),
+    (0, typeorm_1.Index)(),
     __metadata("design:type", String)
 ], User.prototype, "status", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ name: 'joined_at' }),
+    __metadata("design:type", Date)
+], User.prototype, "joinedAt", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

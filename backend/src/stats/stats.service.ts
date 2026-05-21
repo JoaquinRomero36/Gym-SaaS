@@ -14,9 +14,13 @@ export interface DashboardStats {
   churnedUsers: number;
   usersAtHighRisk: number;
   usersAtMediumRisk: number;
+  usersAtLowRisk: number;
   notificationsSentToday: number;
   todayAttendance: number;
   totalCoaches: number;
+  totalMembers: number;
+  statusBreakdown: { status: string; count: number }[];
+  recentRisks: { userId: string; userName: string; score: number; category: string; lastAttendance: string | null }[];
 }
 
 @Injectable()
@@ -38,6 +42,7 @@ export class StatsService {
       this.userRepo.find({ where: { gym_id: gymId } }),
       this.riskRepo.find({
         where: { gym_id: gymId, calculatedAt: MoreThan(this.getStartOfPeriod()) },
+        order: { score: 'DESC' },
       }),
       this.notificationRepo.count({
         where: { gym_id: gymId, status: 'sent' as any, sentAt: MoreThan(today) },
@@ -57,6 +62,31 @@ export class StatsService {
     const mediumRisk = riskScores.filter(
       (r) => r.category === RiskCategory.MEDIUM && this.isRecentScore(r.calculatedAt),
     ).length;
+    const lowRisk = riskScores.filter(
+      (r) => r.category === RiskCategory.LOW && this.isRecentScore(r.calculatedAt),
+    ).length;
+
+    const statusBreakdown = [
+      { status: 'active', count: activeUsers },
+      { status: 'inactive', count: inactiveUsers },
+      { status: 'churned', count: churnedUsers },
+    ];
+
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    const recentRisks = riskScores
+      .filter((r) => userMap.has(r.user_id))
+      .slice(0, 10)
+      .map((r) => {
+        const u = userMap.get(r.user_id)!;
+        return {
+          userId: u.id,
+          userName: u.name,
+          score: r.score,
+          category: r.category,
+          lastAttendance: null as string | null,
+        };
+      });
 
     return {
       totalUsers: users.length,
@@ -65,9 +95,13 @@ export class StatsService {
       churnedUsers,
       usersAtHighRisk: highRisk,
       usersAtMediumRisk: mediumRisk,
+      usersAtLowRisk: lowRisk,
       notificationsSentToday: notificationsToday,
       todayAttendance: todayAttendance,
       totalCoaches: users.filter((u) => u.role === 'coach').length,
+      totalMembers: users.filter((u) => u.role === 'member').length,
+      statusBreakdown,
+      recentRisks,
     };
   }
 

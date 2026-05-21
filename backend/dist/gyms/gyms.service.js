@@ -16,18 +16,23 @@ exports.GymsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const gym_entity_1 = require("./gym.entity");
 let GymsService = class GymsService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
     }
     async findAll() {
-        return this.repo.find();
+        return this.repo.find({ where: { id: this.tenantService.gymId } });
     }
     async findOne(id) {
         const g = await this.repo.findOne({ where: { id } });
         if (!g)
             throw new common_1.NotFoundException(`Gym ${id} not found`);
+        if (g.id !== this.tenantService.gymId) {
+            throw new common_1.NotFoundException(`Gym ${id} not found in this tenant`);
+        }
         return g;
     }
     async create(data) {
@@ -45,6 +50,7 @@ exports.GymsService = GymsService;
 exports.GymsService = GymsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(gym_entity_1.Gym)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], GymsService);
 //# sourceMappingURL=gyms.service.js.map

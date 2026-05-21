@@ -49,26 +49,31 @@ exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const user_entity_1 = require("./user.entity");
 const bcrypt = __importStar(require("bcrypt"));
 let UsersService = class UsersService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
     }
     async findByEmail(email) {
-        return this.repo.findOne({ where: { email } });
+        return this.repo.findOne({ where: { email, gym_id: this.tenantService.gymId } });
     }
     async findOne(id) {
-        const u = await this.repo.findOne({ where: { id } });
+        const u = await this.repo.findOne({ where: { id, gym_id: this.tenantService.gymId } });
         if (!u)
             throw new common_1.NotFoundException(`User ${id} not found`);
         return u;
     }
     async findAllByGym(gymId) {
-        return this.repo.find({ where: { gym_id: gymId } });
+        return this.repo.find({ where: { gym_id: this.tenantService.gymId } });
     }
     async findAllByCoach(coachId) {
-        return this.repo.find({ where: { coach_id: coachId } });
+        return this.repo.find({ where: { coach_id: coachId, gym_id: this.tenantService.gymId } });
+    }
+    async findAllByRole(role, gymId) {
+        return this.repo.find({ where: { role: role, gym_id: gymId } });
     }
     async create(data) {
         const existing = await this.findByEmail(data.email);
@@ -100,6 +105,7 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

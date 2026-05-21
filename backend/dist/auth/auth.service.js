@@ -45,7 +45,7 @@ let AuthService = class AuthService {
                 sub: user.id,
                 email: user.email,
                 role: payload.role,
-                gym_id: user.gym_id,
+                gymId: user.gym_id,
             });
             return { access_token };
         }
@@ -54,7 +54,7 @@ let AuthService = class AuthService {
         }
     }
     buildResponse(user, role) {
-        const payload = { sub: user.id, email: user.email, role, gym_id: user.gym_id };
+        const payload = { sub: user.id, email: user.email, role, gymId: user.gym_id };
         return {
             access_token: this.jwtService.sign(payload),
             refresh_token: this.jwtService.sign(payload, {
@@ -66,7 +66,7 @@ let AuthService = class AuthService {
                 email: user.email,
                 name: user.name,
                 role,
-                gym_id: user.gym_id,
+                gymId: user.gym_id,
             },
         };
     }

@@ -27,11 +27,12 @@ export const routes: Routes = [
 
   // Member
   { path: 'member', canActivate: [roleGuard], data: { role: 'member' }, children: [
+    { path: 'dashboard', loadComponent: () => import('./features/member/member-dashboard/member-dashboard.component').then(c => c.MemberDashboardComponent) },
     { path: 'routine', loadComponent: () => import('./features/member/member-routine/member-routine.component').then(c => c.MemberRoutineComponent) },
     { path: 'feedback', loadComponent: () => import('./features/member/member-feedback/member-feedback.component').then(c => c.MemberFeedbackComponent) },
     { path: 'progress', loadComponent: () => import('./features/member/member-progress/member-progress.component').then(c => c.MemberProgressComponent) },
     { path: 'notifications', loadComponent: () => import('./features/member/member-notifications/member-notifications.component').then(c => c.MemberNotificationsComponent) },
-    { path: '', redirectTo: 'routine', pathMatch: 'full' },
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   ]},
 
   // Fallback

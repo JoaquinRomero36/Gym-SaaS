@@ -1,0 +1,90 @@
+[31m[Nest] 8936  - [39m21/05/2026, 15:48:51 [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39m[31mNest can't resolve dependencies of the GymsService (GymRepository, ?). Please make sure that the argument TenantService at index [1] is available in the GymsModule context.
+
+Potential solutions:
+- Is GymsModule a valid NestJS module?
+- If TenantService is a provider, is it part of the current GymsModule?
+- If TenantService is exported from a separate @Module, is that module imported within GymsModule?
+  @Module({
+    imports: [ /* the Module containing TenantService */ ]
+  })
+[39m
+Error: Nest can't resolve dependencies of the GymsService (GymRepository, ?). Please make sure that the argument TenantService at index [1] is available in the GymsModule context.
+
+Potential solutions:
+- Is GymsModule a valid NestJS module?
+- If TenantService is a provider, is it part of the current GymsModule?
+- If TenantService is exported from a separate @Module, is that module imported within GymsModule?
+  @Module({
+    imports: [ /* the Module containing TenantService */ ]
+  })
+
+    at Injector.lookupComponentInParentModules (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:262:19)
+    at async Injector.resolveComponentInstance (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:215:33)
+    at async resolveParam (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:129:38)
+    at async Promise.all (index 1)
+    at async Injector.resolveConstructorParams (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:144:27)
+    at async Injector.loadInstance (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:70:13)
+    at async Injector.loadProvider (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:98:9)
+    at async C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\instance-loader.js:56:13
+    at async Promise.all (index 3)
+    at async InstanceLoader.createInstancesOfProviders (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\instance-loader.js:55:9)
+[31m[Nest] 17060  - [39m21/05/2026, 15:49:51 [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39m[31mNest can't resolve dependencies of the UsersService (UserRepository, ?). Please make sure that the argument TenantService at index [1] is available in the UsersModule context.
+
+Potential solutions:
+- Is UsersModule a valid NestJS module?
+- If TenantService is a provider, is it part of the current UsersModule?
+- If TenantService is exported from a separate @Module, is that module imported within UsersModule?
+  @Module({
+    imports: [ /* the Module containing TenantService */ ]
+  })
+[39m
+Error: Nest can't resolve dependencies of the UsersService (UserRepository, ?). Please make sure that the argument TenantService at index [1] is available in the UsersModule context.
+
+Potential solutions:
+- Is UsersModule a valid NestJS module?
+- If TenantService is a provider, is it part of the current UsersModule?
+- If TenantService is exported from a separate @Module, is that module imported within UsersModule?
+  @Module({
+    imports: [ /* the Module containing TenantService */ ]
+  })
+
+    at Injector.lookupComponentInParentModules (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:262:19)
+    at async Injector.resolveComponentInstance (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:215:33)
+    at async resolveParam (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:129:38)
+    at async Promise.all (index 1)
+    at async Injector.resolveConstructorParams (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:144:27)
+    at async Injector.loadInstance (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:70:13)
+    at async Injector.loadProvider (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:98:9)
+    at async C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\instance-loader.js:56:13
+    at async Promise.all (index 3)
+    at async InstanceLoader.createInstancesOfProviders (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\instance-loader.js:55:9)
+[31m[Nest] 16432  - [39m21/05/2026, 15:51:54 [31m  ERROR[39m [38;5;3m[ExceptionHandler] [39m[31mNest can't resolve dependencies of the RiskService (RiskScoreRepository, AttendanceService, FeedbackService, TenantService, ?, ConfigService). Please make sure that the argument AiClientService at index [4] is available in the RiskModule context.
+
+Potential solutions:
+- Is RiskModule a valid NestJS module?
+- If AiClientService is a provider, is it part of the current RiskModule?
+- If AiClientService is exported from a separate @Module, is that module imported within RiskModule?
+  @Module({
+    imports: [ /* the Module containing AiClientService */ ]
+  })
+[39m
+Error: Nest can't resolve dependencies of the RiskService (RiskScoreRepository, AttendanceService, FeedbackService, TenantService, ?, ConfigService). Please make sure that the argument AiClientService at index [4] is available in the RiskModule context.
+
+Potential solutions:
+- Is RiskModule a valid NestJS module?
+- If AiClientService is a provider, is it part of the current RiskModule?
+- If AiClientService is exported from a separate @Module, is that module imported within RiskModule?
+  @Module({
+    imports: [ /* the Module containing AiClientService */ ]
+  })
+
+    at Injector.lookupComponentInParentModules (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:262:19)
+    at async Injector.resolveComponentInstance (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:215:33)
+    at async resolveParam (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:129:38)
+    at async Promise.all (index 4)
+    at async Injector.resolveConstructorParams (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:144:27)
+    at async Injector.loadInstance (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:70:13)
+    at async Injector.loadProvider (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\injector.js:98:9)
+    at async C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\instance-loader.js:56:13
+    at async Promise.all (index 3)
+    at async InstanceLoader.createInstancesOfProviders (C:\Users\Joaquin\OneDrive\Escritorio\what a hel\backend\node_modules\@nestjs\core\injector\instance-loader.js:55:9)

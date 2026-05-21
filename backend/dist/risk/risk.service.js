@@ -18,29 +18,33 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
+const ai_client_service_1 = require("../common/services/ai-client.service");
 const risk_score_entity_1 = require("./risk-score.entity");
 const attendance_service_1 = require("../attendance/attendance.service");
 const feedback_service_1 = require("../feedback/feedback.service");
 let RiskService = RiskService_1 = class RiskService {
-    constructor(repo, attendanceService, feedbackService, config) {
+    constructor(repo, attendanceService, feedbackService, tenantService, aiClient, config) {
         this.repo = repo;
         this.attendanceService = attendanceService;
         this.feedbackService = feedbackService;
+        this.tenantService = tenantService;
+        this.aiClient = aiClient;
         this.logger = new common_1.Logger(RiskService_1.name);
         this.highThreshold = config.get('CHURN_THRESHOLD_HIGH', 0.7);
         this.mediumThreshold = config.get('CHURN_THRESHOLD_MEDIUM', 0.4);
     }
-    async calculateFeatures(user) {
-        const lastAttendance = await this.attendanceService.getLastAttendance(user.id);
+    async calculateFeatures(user, gymId) {
+        const lastAttendance = await this.attendanceService.getLastAttendance(user.id, gymId);
         const daysSinceLast = lastAttendance
             ? Math.floor((Date.now() - new Date(lastAttendance.date).getTime()) / 86400000)
             : 999;
-        const weeklyFrequency = (await this.attendanceService.countInRange(user.id, 28)) / 4;
+        const weeklyFrequency = (await this.attendanceService.countInRange(user.id, 28, gymId)) / 4;
         const tenureDays = Math.floor((Date.now() - new Date(user.joinedAt).getTime()) / 86400000);
         const consistencyScore = Math.min(weeklyFrequency / 4, 1);
-        const avgEffort = await this.feedbackService.averageEffort(user.id, 5);
-        const avgEnergy = await this.feedbackService.averageEnergy(user.id, 5);
-        const feedbackCount = await this.feedbackService.countInRange(user.id, 14);
+        const avgEffort = await this.feedbackService.averageEffort(user.id, 5, gymId);
+        const avgEnergy = await this.feedbackService.averageEnergy(user.id, 5, gymId);
+        const feedbackCount = await this.feedbackService.countInRange(user.id, 14, gymId);
         return {
             days_since_last_attendance: daysSinceLast,
             weekly_frequency: Math.round(weeklyFrequency * 100) / 100,
@@ -77,10 +81,34 @@ let RiskService = RiskService_1 = class RiskService {
             category = risk_score_entity_1.RiskCategory.LOW;
         return { score, category };
     }
-    async calculateForUser(user) {
-        const features = await this.calculateFeatures(user);
-        const { score, category } = this.computeScore(features);
-        const existing = await this.repo.findOne({ where: { user_id: user.id } });
+    parseCategory(category) {
+        switch (category.toLowerCase()) {
+            case 'high': return risk_score_entity_1.RiskCategory.HIGH;
+            case 'medium': return risk_score_entity_1.RiskCategory.MEDIUM;
+            default: return risk_score_entity_1.RiskCategory.LOW;
+        }
+    }
+    async calculateForUser(user, gymId) {
+        const targetGymId = gymId || this.tenantService.gymId;
+        const gId = targetGymId;
+        const features = await this.calculateFeatures(user, gId);
+        const aiResult = await this.aiClient.predictChurn(features);
+        let score;
+        let category;
+        if (aiResult) {
+            score = aiResult.score;
+            category = this.parseCategory(aiResult.category);
+            this.logger.log(`AI Service scored user ${user.id}: ${score.toFixed(4)} (${category})`);
+        }
+        else {
+            const local = this.computeScore(features);
+            score = local.score;
+            category = local.category;
+            this.logger.log(`Local fallback scored user ${user.id}: ${score.toFixed(4)} (${category})`);
+        }
+        const existing = await this.repo.findOne({
+            where: { user_id: user.id, gym_id: gId },
+        });
         if (existing) {
             existing.score = score;
             existing.category = category;
@@ -90,7 +118,7 @@ let RiskService = RiskService_1 = class RiskService {
         else {
             await this.repo.save(this.repo.create({
                 user_id: user.id,
-                gym_id: user.gym_id,
+                gym_id: gId,
                 score,
                 category,
                 features: features,
@@ -99,15 +127,35 @@ let RiskService = RiskService_1 = class RiskService {
         this.logger.log(`Risk for ${user.id}: score=${score.toFixed(4)} category=${category}`);
         return { score, category, features };
     }
+    async calculateForUserBatch(user, gymId) {
+        return this.tenantService.runInTenantContext(gymId, async () => {
+            return this.calculateForUser(user, gymId);
+        });
+    }
     async getLatest(userId) {
+        const gymId = this.tenantService.safeGymId;
+        if (!gymId) {
+            const scores = await this.repo.find({
+                where: { user_id: userId },
+                order: { calculatedAt: 'DESC' },
+                take: 1,
+            });
+            return scores[0] ?? null;
+        }
         const scores = await this.repo.find({
-            where: { user_id: userId },
+            where: { user_id: userId, gym_id: gymId },
             order: { calculatedAt: 'DESC' },
             take: 1,
         });
         return scores[0] ?? null;
     }
-    async getFeatures(userId) {
+    async getScoresByGym(gymId, category) {
+        const where = { gym_id: gymId };
+        if (category)
+            where.category = category;
+        return this.repo.find({ where, order: { calculatedAt: 'DESC' } });
+    }
+    async getFeature(userId) {
         const latest = await this.getLatest(userId);
         return (latest?.features ?? null);
     }
@@ -119,6 +167,8 @@ exports.RiskService = RiskService = RiskService_1 = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         attendance_service_1.AttendanceService,
         feedback_service_1.FeedbackService,
+        tenant_service_1.TenantService,
+        ai_client_service_1.AiClientService,
         config_1.ConfigService])
 ], RiskService);
 //# sourceMappingURL=risk.service.js.map

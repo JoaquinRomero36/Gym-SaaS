@@ -16,10 +16,12 @@ exports.ExercisesService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const exercise_entity_1 = require("./exercise.entity");
 let ExercisesService = class ExercisesService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
     }
     async create(dto) {
         return this.repo.save(this.repo.create(dto));
@@ -52,6 +54,7 @@ exports.ExercisesService = ExercisesService;
 exports.ExercisesService = ExercisesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(exercise_entity_1.Exercise)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], ExercisesService);
 //# sourceMappingURL=exercises.service.js.map

@@ -6,13 +6,12 @@ import { User } from '../users/user.entity';
 import { RiskScore } from '../risk/risk-score.entity';
 import { Notification } from '../notifications/notification.entity';
 import { AttendanceLog } from '../attendance/attendance-log.entity';
-import { TenantService } from '../common/services/tenant.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, RiskScore, Notification, AttendanceLog]),
   ],
-  providers: [StatsService, TenantService],
+  providers: [StatsService],
   controllers: [StatsController],
   exports: [StatsService],
 })

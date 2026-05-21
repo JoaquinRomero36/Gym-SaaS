@@ -26,6 +26,6 @@ export declare class User {
     passwordHash: string;
     role: UserRole;
     level: UserLevel;
-    joinedAt: Date;
     status: UserStatus;
+    joinedAt: Date;
 }

@@ -17,16 +17,21 @@ exports.FeedbackService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const feedback_entry_entity_1 = require("./feedback-entry.entity");
 let FeedbackService = FeedbackService_1 = class FeedbackService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
         this.logger = new common_1.Logger(FeedbackService_1.name);
     }
-    async create(dto) {
+    getGymId(explicitGymId) {
+        return explicitGymId || this.tenantService.gymId;
+    }
+    async create(dto, gymId) {
         const entry = this.repo.create({
             user_id: dto.user_id,
-            gym_id: dto.gym_id,
+            gym_id: this.getGymId(gymId),
             date: new Date(dto.date),
             effortLevel: dto.effort_level,
             energyLevel: dto.energy_level,
@@ -34,32 +39,35 @@ let FeedbackService = FeedbackService_1 = class FeedbackService {
         });
         return this.repo.save(entry);
     }
-    async findByUser(userId) {
-        return this.repo.find({ where: { user_id: userId }, order: { date: 'DESC' } });
-    }
-    async getLastN(userId, n) {
+    async findByUser(userId, gymId) {
         return this.repo.find({
-            where: { user_id: userId },
+            where: { user_id: userId, gym_id: this.getGymId(gymId) },
+            order: { date: 'DESC' },
+        });
+    }
+    async getLastN(userId, n, gymId) {
+        return this.repo.find({
+            where: { user_id: userId, gym_id: this.getGymId(gymId) },
             order: { date: 'DESC' },
             take: n,
         });
     }
-    async countInRange(userId, days) {
+    async countInRange(userId, days, gymId) {
         const end = new Date();
         const start = new Date();
         start.setDate(start.getDate() - days);
         return this.repo.count({
-            where: { user_id: userId, date: (0, typeorm_2.Between)(start, end) },
+            where: { user_id: userId, gym_id: this.getGymId(gymId), date: (0, typeorm_2.Between)(start, end) },
         });
     }
-    async averageEffort(userId, lastN) {
-        const entries = await this.getLastN(userId, lastN);
+    async averageEffort(userId, lastN, gymId) {
+        const entries = await this.getLastN(userId, lastN, gymId);
         if (!entries.length)
             return 0;
         return entries.reduce((a, e) => a + e.effortLevel, 0) / entries.length;
     }
-    async averageEnergy(userId, lastN) {
-        const entries = await this.getLastN(userId, lastN);
+    async averageEnergy(userId, lastN, gymId) {
+        const entries = await this.getLastN(userId, lastN, gymId);
         if (!entries.length)
             return 0;
         return entries.reduce((a, e) => a + e.energyLevel, 0) / entries.length;
@@ -69,6 +77,7 @@ exports.FeedbackService = FeedbackService;
 exports.FeedbackService = FeedbackService = FeedbackService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(feedback_entry_entity_1.FeedbackEntry)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], FeedbackService);
 //# sourceMappingURL=feedback.service.js.map

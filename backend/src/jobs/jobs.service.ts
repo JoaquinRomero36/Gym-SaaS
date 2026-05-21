@@ -4,7 +4,7 @@ import { Queue } from 'bullmq';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { JobNames } from './job-names';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { User, UserStatus } from '../users/user.entity';
 import { RiskService } from '../risk/risk.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -59,26 +59,35 @@ export class JobsService {
     );
   }
 
-  // ─── Process batch ──────────────────────────────────────────────
+  // ─── Process batch (paginated) ──────────────────────────────────
+  private readonly BATCH_SIZE = 100;
+
   async processBatch() {
-    const activeUsers = await this.userRepo.find({
-      where: { status: UserStatus.ACTIVE },
-    });
-    this.logger.log(`Processing batch for ${activeUsers.length} users`);
+    let processed = 0;
+    let cursor: string | undefined;
+    let page = 0;
 
-    // Group users by gym for tenant context
-    const usersByGym: Record<string, User[]> = {};
-    for (const user of activeUsers) {
-      if (!usersByGym[user.gym_id]) usersByGym[user.gym_id] = [];
-      usersByGym[user.gym_id].push(user);
-    }
+    this.logger.log('🏋️ Starting paginated batch churn prediction');
 
-    for (const [gymId, users] of Object.entries(usersByGym)) {
+    while (true) {
+      const where: any = { status: UserStatus.ACTIVE };
+      if (cursor) where.id = MoreThan(cursor);
+
+      const users = await this.userRepo.find({
+        where,
+        order: { id: 'ASC' },
+        take: this.BATCH_SIZE,
+      });
+
+      if (users.length === 0) break;
+
+      page++;
+      this.logger.log(`Page ${page}: ${users.length} users (cursor: ${cursor?.slice(0, 8) ?? 'start'})`);
+
       for (const user of users) {
         try {
-          const result = await this.riskService.calculateForUserBatch(user, gymId);
+          const result = await this.riskService.calculateForUserBatch(user, user.gym_id);
 
-          // If high risk, trigger coach alert
           if (result.category === 'high') {
             await this.coachAlertQueue.add(
               'alert',
@@ -87,7 +96,6 @@ export class JobsService {
             );
           }
 
-          // Send message via AI service
           if (result.category === 'high' || result.category === 'medium') {
             await this.triggerMessaging(user.id, result.category);
           }
@@ -95,7 +103,12 @@ export class JobsService {
           this.logger.error(`Batch error for user ${user.id}:`, err);
         }
       }
+
+      processed += users.length;
+      cursor = users[users.length - 1].id;
     }
+
+    this.logger.log(`✅ Batch complete: ${processed} total users processed in ${page} pages`);
   }
 
   // ─── Process single user ────────────────────────────────────────

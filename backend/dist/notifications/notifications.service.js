@@ -17,16 +17,18 @@ exports.NotificationsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const tenant_service_1 = require("../common/services/tenant.service");
 const notification_entity_1 = require("./notification.entity");
 let NotificationsService = NotificationsService_1 = class NotificationsService {
-    constructor(repo) {
+    constructor(repo, tenantService) {
         this.repo = repo;
+        this.tenantService = tenantService;
         this.logger = new common_1.Logger(NotificationsService_1.name);
     }
     async create(data) {
         const notif = this.repo.create({
             user_id: data.user_id,
-            gym_id: data.gym_id,
+            gym_id: this.tenantService.gymId,
             channel: data.channel,
             message: data.message,
             trigger: data.trigger,
@@ -37,7 +39,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     }
     async findByUser(userId) {
         return this.repo.find({
-            where: { user_id: userId },
+            where: { user_id: userId, gym_id: this.tenantService.gymId },
             order: { createdAt: 'DESC' },
         });
     }
@@ -52,6 +54,7 @@ exports.NotificationsService = NotificationsService;
 exports.NotificationsService = NotificationsService = NotificationsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(notification_entity_1.Notification)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_service_1.TenantService])
 ], NotificationsService);
 //# sourceMappingURL=notifications.service.js.map
