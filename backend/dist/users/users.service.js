@@ -58,7 +58,11 @@ let UsersService = class UsersService {
         this.tenantService = tenantService;
     }
     async findByEmail(email) {
-        return this.repo.findOne({ where: { email, gym_id: this.tenantService.gymId } });
+        const gymId = this.tenantService.safeGymId;
+        if (gymId) {
+            return this.repo.findOne({ where: { email, gym_id: gymId } });
+        }
+        return this.repo.findOne({ where: { email } });
     }
     async findOne(id) {
         const u = await this.repo.findOne({ where: { id, gym_id: this.tenantService.gymId } });

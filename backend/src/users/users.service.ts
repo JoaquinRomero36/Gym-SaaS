@@ -13,7 +13,11 @@ export class UsersService {
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.repo.findOne({ where: { email, gym_id: this.tenantService.gymId } });
+    const gymId = this.tenantService.safeGymId;
+    if (gymId) {
+      return this.repo.findOne({ where: { email, gym_id: gymId } });
+    }
+    return this.repo.findOne({ where: { email } });
   }
 
   async findOne(id: string): Promise<User> {
