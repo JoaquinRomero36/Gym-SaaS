@@ -24,7 +24,10 @@ let RoutinesController = class RoutinesController {
     async create(dto) {
         return this.service.create(dto);
     }
-    async findAll() {
+    async findAll(userId) {
+        if (userId) {
+            return this.service.findAllByUser(userId);
+        }
         return this.service.findAllByGym();
     }
     async findOne(id) {
@@ -48,8 +51,9 @@ __decorate([
 ], RoutinesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('user_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], RoutinesController.prototype, "findAll", null);
 __decorate([

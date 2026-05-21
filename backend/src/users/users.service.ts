@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TenantService } from '../common/services/tenant.service';
 import { User, UserLevel, UserStatus } from './user.entity';
+import { UpdateUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -18,6 +19,15 @@ export class UsersService {
       return this.repo.findOne({ where: { email, gym_id: gymId } });
     }
     return this.repo.findOne({ where: { email } });
+  }
+
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    const gymId = this.tenantService.safeGymId;
+    const query = this.repo.createQueryBuilder('user').addSelect('user.passwordHash');
+    if (gymId) {
+      return query.where('user.email = :email AND user.gym_id = :gymId', { email, gymId }).getOne();
+    }
+    return query.where('user.email = :email', { email }).getOne();
   }
 
   async findOne(id: string): Promise<User> {
@@ -57,7 +67,7 @@ export class UsersService {
     return this.repo.save(user);
   }
 
-  async update(id: string, data: Partial<User>): Promise<User> {
+  async update(id: string, data: UpdateUserDto): Promise<User> {
     await this.repo.update(id, data);
     return this.findOne(id);
   }

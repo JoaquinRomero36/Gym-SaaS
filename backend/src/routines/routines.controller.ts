@@ -18,7 +18,10 @@ export class RoutinesController {
   }
 
   @Get()
-  async findAll(): Promise<Routine[]> {
+  async findAll(@Query('user_id') userId?: string): Promise<Routine[]> {
+    if (userId) {
+      return this.service.findAllByUser(userId);
+    }
     return this.service.findAllByGym();
   }
 

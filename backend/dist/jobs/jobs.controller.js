@@ -24,8 +24,8 @@ let JobsController = class JobsController {
         await this.jobsService.triggerSinglePrediction(userId);
         return { message: `Prediction queued for user ${userId}` };
     }
-    async triggerMessaging(userId, trigger) {
-        await this.jobsService.triggerMessaging(userId, trigger);
+    async triggerMessaging(userId) {
+        await this.jobsService.triggerMessaging(userId, 'manual');
         return { message: `Messaging queued for user ${userId}` };
     }
 };
@@ -42,9 +42,8 @@ __decorate([
     (0, common_1.Post)('messaging/:userId'),
     (0, roles_decorator_1.Roles)('admin', 'coach'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
-    __param(1, (0, common_1.Param)('trigger')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], JobsController.prototype, "triggerMessaging", null);
 exports.JobsController = JobsController = __decorate([

@@ -19,6 +19,12 @@ export class RiskController {
     return this.riskService.calculateForUser(user);
   }
 
+  @Get('all')
+  async getAllScores(@Query('category') category?: RiskCategory): Promise<RiskScore[]> {
+    const gymId = this.tenantService.gymId;
+    return this.riskService.getScoresByGym(gymId, category);
+  }
+
   @Get(':userId')
   async getLatest(@Param('userId', ParseUUIDPipe) userId: string): Promise<RiskScore | null> {
     return this.riskService.getLatest(userId);
@@ -27,11 +33,5 @@ export class RiskController {
   @Get(':userId/features')
   async getFeatures(@Param('userId', ParseUUIDPipe) userId: string): Promise<ChurnFeatures | null> {
     return this.riskService.getFeature(userId);
-  }
-
-  @Get('all')
-  async getAllScores(@Query('category') category?: RiskCategory): Promise<RiskScore[]> {
-    const gymId = this.tenantService.gymId;
-    return this.riskService.getScoresByGym(gymId, category);
   }
 }

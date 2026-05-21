@@ -9,6 +9,7 @@ export class TenantGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     if (user?.gymId) {
+      request.gymId = user.gymId;
       this.tenantService.setTenantContext(user.gymId);
     }
     return true;

@@ -15,11 +15,8 @@ export class JobsController {
 
   @Post('messaging/:userId')
   @Roles('admin', 'coach')
-  async triggerMessaging(
-    @Param('userId', ParseUUIDPipe) userId: string,
-    @Param('trigger') trigger: string,
-  ) {
-    await this.jobsService.triggerMessaging(userId, trigger);
+  async triggerMessaging(@Param('userId', ParseUUIDPipe) userId: string) {
+    await this.jobsService.triggerMessaging(userId, 'manual');
     return { message: `Messaging queued for user ${userId}` };
   }
 }

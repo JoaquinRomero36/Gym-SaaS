@@ -161,7 +161,7 @@ export class JobsService {
     if (!user?.coach_id) return;
 
     await this.notificationsService.create({
-      user_id: user.coach_id as string,
+      user_id: user.coach_id,
       channel: 'in-app',
       message: `⚠️ Alerta: ${user.name} tiene alto riesgo de abandono (score: ${score.toFixed(2)})`,
       trigger: 'high_risk',

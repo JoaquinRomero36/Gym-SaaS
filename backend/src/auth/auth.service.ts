@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
+import { TenantService } from '../common/services/tenant.service';
 import { RegisterDto } from './dto';
 import { User } from '../users/user.entity';
 
@@ -20,6 +21,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private config: ConfigService,
+    private tenantService: TenantService,
   ) {}
 
   async register(dto: RegisterDto, role = 'member'): Promise<AuthResponse> {
@@ -28,8 +30,9 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmailWithPassword(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (user.status !== 'active') throw new UnauthorizedException('Account is not active');
 
     const valid = await this.usersService.validatePassword(user, password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
@@ -42,8 +45,11 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.config.get('JWT_REFRESH_SECRET'),
       });
-      const user = await this.usersService.findOne(payload.sub);
-      if (!user) throw new UnauthorizedException();
+      const gymId = payload.gymId as string;
+
+      const user = await this.tenantService.runInTenantContext(gymId, () => {
+        return this.usersService.findOne(payload.sub);
+      });
 
       const access_token = this.jwtService.sign({
         sub: user.id,

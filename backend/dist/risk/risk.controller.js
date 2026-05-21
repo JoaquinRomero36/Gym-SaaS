@@ -28,15 +28,15 @@ let RiskController = class RiskController {
         const user = await this.usersService.findOne(userId);
         return this.riskService.calculateForUser(user);
     }
+    async getAllScores(category) {
+        const gymId = this.tenantService.gymId;
+        return this.riskService.getScoresByGym(gymId, category);
+    }
     async getLatest(userId) {
         return this.riskService.getLatest(userId);
     }
     async getFeatures(userId) {
         return this.riskService.getFeature(userId);
-    }
-    async getAllScores(category) {
-        const gymId = this.tenantService.gymId;
-        return this.riskService.getScoresByGym(gymId, category);
     }
 };
 exports.RiskController = RiskController;
@@ -47,6 +47,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], RiskController.prototype, "calculate", null);
+__decorate([
+    (0, common_1.Get)('all'),
+    __param(0, (0, common_1.Query)('category')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], RiskController.prototype, "getAllScores", null);
 __decorate([
     (0, common_1.Get)(':userId'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
@@ -61,13 +68,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], RiskController.prototype, "getFeatures", null);
-__decorate([
-    (0, common_1.Get)('all'),
-    __param(0, (0, common_1.Query)('category')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], RiskController.prototype, "getAllScores", null);
 exports.RiskController = RiskController = __decorate([
     (0, common_1.Controller)('risk'),
     __metadata("design:paramtypes", [risk_service_1.RiskService,

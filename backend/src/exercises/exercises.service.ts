@@ -13,23 +13,25 @@ export class ExercisesService {
   ) {}
 
   async create(dto: CreateExerciseDto): Promise<Exercise> {
-    return this.repo.save(this.repo.create(dto));
+    return this.repo.save(
+      this.repo.create({ ...dto, gym_id: this.tenantService.gymId }),
+    );
   }
 
   async createMany(dtos: CreateExerciseDto[]): Promise<Exercise[]> {
-    const entities = dtos.map((d) => this.repo.create(d));
+    const entities = dtos.map((d) => this.repo.create({ ...d, gym_id: this.tenantService.gymId }));
     return this.repo.save(entities);
   }
 
   async findByRoutine(routineId: string): Promise<Exercise[]> {
     return this.repo.find({
-      where: { routine_id: routineId },
+      where: { routine_id: routineId, gym_id: this.tenantService.gymId },
       order: { order: 'ASC' },
     });
   }
 
   async findOne(id: string): Promise<Exercise> {
-    const e = await this.repo.findOne({ where: { id } });
+    const e = await this.repo.findOne({ where: { id, gym_id: this.tenantService.gymId } });
     if (!e) throw new NotFoundException(`Exercise ${id} not found`);
     return e;
   }
@@ -40,6 +42,7 @@ export class ExercisesService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.repo.delete(id);
+    const gymId = this.tenantService.gymId;
+    await this.repo.delete({ id, gym_id: gymId });
   }
 }

@@ -55,10 +55,10 @@ export class AiClientService {
         ),
       );
 
-      return response.data.predictions.map((p: any) => ({
+      return response.data.predictions.map((p: any, idx: number) => ({
         score: p.score,
         category: p.category as ChurnResult['category'],
-        features: featuresList[0], // paired by index
+        features: featuresList[idx], // paired by index
       }));
     } catch (err) {
       this.logger.warn(`AI Service unavailable for batch prediction: ${err.message}`);

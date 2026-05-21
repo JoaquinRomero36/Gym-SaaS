@@ -5,7 +5,7 @@ export declare class RoutinesController {
     private readonly service;
     constructor(service: RoutinesService);
     create(dto: CreateRoutineDto): Promise<Routine>;
-    findAll(): Promise<Routine[]>;
+    findAll(userId?: string): Promise<Routine[]>;
     findOne(id: string): Promise<Routine>;
     update(id: string, dto: UpdateRoutineDto): Promise<Routine>;
     remove(id: string): Promise<void>;

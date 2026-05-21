@@ -5,7 +5,7 @@ export declare class JobsController {
     triggerSinglePrediction(userId: string): Promise<{
         message: string;
     }>;
-    triggerMessaging(userId: string, trigger: string): Promise<{
+    triggerMessaging(userId: string): Promise<{
         message: string;
     }>;
 }

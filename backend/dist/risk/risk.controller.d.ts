@@ -9,7 +9,7 @@ export declare class RiskController {
     private readonly tenantService;
     constructor(riskService: RiskService, usersService: UsersService, tenantService: TenantService);
     calculate(userId: string): Promise<ChurnResult>;
+    getAllScores(category?: RiskCategory): Promise<RiskScore[]>;
     getLatest(userId: string): Promise<RiskScore | null>;
     getFeatures(userId: string): Promise<ChurnFeatures | null>;
-    getAllScores(category?: RiskCategory): Promise<RiskScore[]>;
 }
