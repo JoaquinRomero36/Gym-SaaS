@@ -73,7 +73,7 @@ export class UsersService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.repo.delete(id);
+    await this.repo.softDelete({ id, gym_id: this.tenantService.gymId });
   }
 
   async validatePassword(user: User, password: string): Promise<boolean> {

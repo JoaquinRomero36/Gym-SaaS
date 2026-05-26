@@ -18,6 +18,7 @@ export class RoutinesController {
   }
 
   @Get()
+  @Roles('admin', 'coach', 'member')
   async findAll(@Query('user_id') userId?: string): Promise<Routine[]> {
     if (userId) {
       return this.service.findAllByUser(userId);
@@ -26,6 +27,7 @@ export class RoutinesController {
   }
 
   @Get(':id')
+  @Roles('admin', 'coach', 'member')
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Routine> {
     return this.service.findOne(id);
   }

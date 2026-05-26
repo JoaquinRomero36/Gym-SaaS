@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   OneToMany,
   Index,
 } from 'typeorm';
@@ -32,6 +33,9 @@ export class Gym {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt?: Date;
 
   @OneToMany(() => User, (u) => u.gym)
   users!: User[];

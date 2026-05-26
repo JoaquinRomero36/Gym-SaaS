@@ -22,11 +22,13 @@ export class CoachesController {
   }
 
   @Get()
-  async findAll(@Query('gym_id') gymId?: string): Promise<Coach[]> {
+  @Roles('admin', 'coach', 'member')
+  async findAll(): Promise<Coach[]> {
     return this.service.findAll();
   }
 
   @Get(':id')
+  @Roles('admin', 'coach', 'member')
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Coach> {
     return this.service.findOne(id);
   }

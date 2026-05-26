@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index, DeleteDateColumn } from 'typeorm';
 import { Routine } from '../routines/routine.entity';
 import { Gym } from '../gyms/gym.entity';
 
@@ -33,4 +33,7 @@ export class Exercise {
 
   @Column({ type: 'int' })
   order!: number;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt?: Date;
 }

@@ -1,6 +1,7 @@
 import {
   Controller, Get, Post, Body, Param, ParseUUIDPipe, Query,
 } from '@nestjs/common';
+import { Roles } from '../common/decorators/roles.decorator';
 import { FeedbackService } from './feedback.service';
 import { CreateFeedbackDto } from './dto';
 import { FeedbackEntry } from './feedback-entry.entity';
@@ -10,16 +11,19 @@ export class FeedbackController {
   constructor(private readonly service: FeedbackService) {}
 
   @Post()
+  @Roles('admin', 'coach', 'member')
   async create(@Body() dto: CreateFeedbackDto): Promise<FeedbackEntry> {
     return this.service.create(dto);
   }
 
   @Get('user/:userId')
+  @Roles('admin', 'coach', 'member')
   async findByUser(@Param('userId', ParseUUIDPipe) userId: string): Promise<FeedbackEntry[]> {
     return this.service.findByUser(userId);
   }
 
   @Get('user/:userId/last')
+  @Roles('admin', 'coach', 'member')
   async getLastN(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Query('n') n: string,
@@ -28,6 +32,7 @@ export class FeedbackController {
   }
 
   @Get('user/:userId/averages')
+  @Roles('admin', 'coach', 'member')
   async getAverages(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Query('last') last: string,
@@ -40,6 +45,7 @@ export class FeedbackController {
   }
 
   @Get('user/:userId/count')
+  @Roles('admin', 'coach', 'member')
   async countInRange(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Query('days') days: string,

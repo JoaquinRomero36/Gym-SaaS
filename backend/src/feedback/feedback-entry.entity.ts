@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, DeleteDateColumn, Index } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Gym } from '../gyms/gym.entity';
 
@@ -37,4 +37,7 @@ export class FeedbackEntry {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt?: Date;
 }

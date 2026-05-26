@@ -1,5 +1,5 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
+  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn,
   ManyToOne, OneToMany, JoinColumn,
 } from 'typeorm';
 import { Gym } from '../gyms/gym.entity';
@@ -41,4 +41,7 @@ export class Routine {
 
   @OneToMany(() => Exercise, (e) => e.routine)
   exercises!: Exercise[];
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt?: Date;
 }

@@ -34,6 +34,10 @@ export class GymsService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.repo.delete(id);
+    const gym = await this.findOne(id);
+    if (gym.id !== this.tenantService.gymId) {
+      throw new NotFoundException(`Gym ${id} not found`);
+    }
+    await this.repo.softDelete(id);
   }
 }

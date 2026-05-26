@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { HealthCheckService, HealthCheck, TypeOrmHealthIndicator } from '@nestjs/terminus';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -11,6 +12,7 @@ export class HealthController {
 
   @Get()
   @Public()
+  @SkipThrottle()
   @HealthCheck()
   check() {
     return this.health.check([

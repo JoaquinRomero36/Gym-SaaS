@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { HealthModule } from './health/health.module';
 import { GymsModule } from './gyms/gyms.module';
 import { UsersModule } from './users/users.module';
@@ -23,6 +24,9 @@ import { TenantGuard } from './common/guards/tenant.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.local'] }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ limit: 30, ttl: 60000 }],
+    }),
     HttpModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -57,6 +61,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: TenantGuard },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

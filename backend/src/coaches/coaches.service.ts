@@ -37,6 +37,6 @@ export class CoachesService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.repo.delete(id);
+    await this.repo.softDelete({ id, gym_id: this.tenantService.gymId });
   }
 }

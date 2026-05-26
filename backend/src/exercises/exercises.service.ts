@@ -42,7 +42,6 @@ export class ExercisesService {
   }
 
   async remove(id: string): Promise<void> {
-    const gymId = this.tenantService.gymId;
-    await this.repo.delete({ id, gym_id: gymId });
+    await this.repo.softDelete({ id, gym_id: this.tenantService.gymId });
   }
 }
