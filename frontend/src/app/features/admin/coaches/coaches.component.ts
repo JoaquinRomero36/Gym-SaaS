@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -13,16 +13,23 @@ import { AuthService } from '../../../core/auth.service';
       <div class="flex-between" style="margin-bottom:24px">
         <div>
           <h1 class="page-title" style="margin:0">Coaches</h1>
-          <p class="page-subtitle">{{ coaches().length }} coaches registrados</p>
+          <p class="page-subtitle">{{ filteredCoaches().length }} coaches registrados</p>
         </div>
         <button class="btn btn-primary" (click)="openCreate()">+ Nuevo coach</button>
       </div>
 
-      @if (coaches().length === 0) {
+      <div style="margin-bottom:16px">
+        <input #searchInput (input)="searchTerm.set(searchInput.value)" placeholder="Buscar por nombre o email..." class="input" style="max-width:320px">
+      </div>
+
+      @if (filteredCoaches().length === 0) {
         <div class="empty-state">
           <span class="empty-icon">👥</span>
-          <h3 class="empty-title">Sin coaches</h3>
-          <p class="empty-text">Aún no hay coaches registrados en el sistema.</p>
+          <h3 class="empty-title">{{ coaches().length === 0 ? 'Sin coaches' : 'Sin resultados' }}</h3>
+          <p class="empty-text">{{ coaches().length === 0 ? 'Aún no hay coaches registrados en el sistema. Agregá el primer coach para empezar.' : 'No hay coaches que coincidan con la búsqueda.' }}</p>
+          @if (coaches().length === 0) {
+            <button class="btn btn-primary" style="margin-top:16px" (click)="openCreate()">+ Nuevo coach</button>
+          }
         </div>
       }
 
@@ -37,7 +44,7 @@ import { AuthService } from '../../../core/auth.service';
               </tr>
             </thead>
             <tbody>
-              @for (c of coaches(); track c.id) {
+              @for (c of filteredCoaches(); track c.id) {
                 <tr>
                   <td style="font-weight:500">{{ c.name }}</td>
                   <td style="color:var(--color-text-secondary)">{{ c.email }}</td>
@@ -91,6 +98,12 @@ export class CoachesComponent {
   gymId = this.auth.user()?.gymId ?? '';
 
   coaches = toSignal(this.http.get<any[]>('/api/v1/coaches'), { initialValue: [] });
+  searchTerm = signal('');
+
+  filteredCoaches = computed(() => {
+    const q = this.searchTerm().toLowerCase();
+    return this.coaches().filter(c => !q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+  });
 
   showForm = signal(false);
   editingCoach = signal<any | null>(null);

@@ -55,7 +55,8 @@ import { lastValueFrom } from 'rxjs';
         <div class="empty-state">
           <span class="empty-icon">👥</span>
           <h3 class="empty-title">Sin miembros</h3>
-          <p class="empty-text">Aún no tenés miembros asignados.</p>
+          <p class="empty-text">Aún no tenés miembros asignados. Creá una rutina y asignala para empezar.</p>
+          <a routerLink="/coach/routines/create" class="btn btn-primary" style="margin-top:16px">+ Nueva rutina</a>
         </div>
       }
       <div style="display:flex;flex-direction:column;gap:8px">
