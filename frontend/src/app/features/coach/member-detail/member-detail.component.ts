@@ -20,22 +20,22 @@ import { toSignal } from '@angular/core/rxjs-interop';
             <span class="badge" [class.badge-success]="m.status === 'active'" [class.badge-danger]="m.status !== 'active'">
               {{ m.status }}
             </span>
-            <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px" (click)="calcRisk()" [disabled]="loadingRisk()" [attr.aria-label]="'Calcular riesgo de ' + m.name">
+            <button class="btn btn-ghost" style="padding:6px 12px" (click)="calcRisk()" [disabled]="loadingRisk()" [attr.aria-label]="'Calcular riesgo de ' + m.name">
               {{ loadingRisk() ? '...' : '🔄' }} Riesgo
             </button>
-            <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px" (click)="sendMsg()" [disabled]="loadingMsg()" [attr.aria-label]="'Enviar alerta a ' + m.name">
+            <button class="btn btn-ghost" style="padding:6px 12px" (click)="sendMsg()" [disabled]="loadingMsg()" [attr.aria-label]="'Enviar alerta a ' + m.name">
               {{ loadingMsg() ? '...' : '📨' }} Alertar
             </button>
           </div>
         </div>
         @if (actionMsg()) {
-          <div style="background:var(--color-success-bg, var(--color-success-bg));color:var(--color-success, var(--color-success));padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ actionMsg() }}</div>
+          <div style="background:var(--color-success-bg, var(--color-success-bg));color:var(--color-success, var(--color-success));padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px">{{ actionMsg() }}</div>
         }
         @if (actionError()) {
           <div class="alert alert-danger mb-16">{{ actionError() }}</div>
         }
 
-        <div class="grid-3" class="mb-24">
+        <div class="grid-3 mb-24">
           <div class="stat-card">
             <div class="stat-icon stat-icon-danger">⚠️</div>
             <div>

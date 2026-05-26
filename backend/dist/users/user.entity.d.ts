@@ -28,4 +28,5 @@ export declare class User {
     level: UserLevel;
     status: UserStatus;
     joinedAt: Date;
+    deletedAt?: Date;
 }

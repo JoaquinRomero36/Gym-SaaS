@@ -11,4 +11,5 @@ export declare class FeedbackEntry {
     energyLevel: number;
     note?: string;
     createdAt: Date;
+    deletedAt?: Date;
 }

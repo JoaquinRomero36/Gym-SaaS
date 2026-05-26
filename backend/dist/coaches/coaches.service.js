@@ -78,7 +78,7 @@ let CoachesService = class CoachesService {
         return this.findOne(id);
     }
     async remove(id) {
-        await this.repo.delete(id);
+        await this.repo.softDelete({ id, gym_id: this.tenantService.gymId });
     }
 };
 exports.CoachesService = CoachesService;

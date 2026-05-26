@@ -7,7 +7,7 @@ export declare class CoachesController {
     private readonly tenantService;
     constructor(service: CoachesService, tenantService: TenantService);
     create(dto: CreateCoachDto): Promise<Coach>;
-    findAll(gymId?: string): Promise<Coach[]>;
+    findAll(): Promise<Coach[]>;
     findOne(id: string): Promise<Coach>;
     update(id: string, dto: UpdateCoachDto): Promise<Coach>;
     remove(id: string): Promise<void>;

@@ -10,7 +10,7 @@ import { RouterLink, Router } from '@angular/router';
   imports: [RouterLink],
   template: `
     <div class="animate-fade">
-      <div class="flex-between" class="mb-24">
+      <div class="flex-between mb-24">
         <div>
           <h1 class="page-title" style="margin:0">Rutinas</h1>
           <p class="page-subtitle">{{ routines().length }} rutinas creadas</p>
@@ -27,18 +27,18 @@ import { RouterLink, Router } from '@angular/router';
         </div>
       }
 
-      <div class="stagger" style="display:flex;flex-direction:column;gap:8px">
+      <div class="stagger flex-col-gap">
         @for (r of routines(); track r.id) {
           <div class="card-hover" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
             <div style="display:flex;align-items:center;gap:16px;flex:1;cursor:pointer" (click)="editRoutine(r.id)">
               <div style="width:40px;height:40px;border-radius:var(--radius-lg);background:var(--color-primary-bg);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:18px">🏋️</div>
               <div>
                 <div style="font-weight:600;font-size:14px">{{ r.name }}</div>
-                <div style="font-size:13px;color:var(--color-text-secondary)">{{ r.exercises?.length ?? 0 }} ejercicios</div>
+                <div style="color:var(--color-text-secondary)">{{ r.exercises?.length ?? 0 }} ejercicios</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:12px;color:var(--color-text-muted)">{{ formatDate(r.createdAt) }}</span>
+              <span style="color:var(--color-text-muted)">{{ formatDate(r.createdAt) }}</span>
               <button class="btn-icon" title="Editar" (click)="editRoutine(r.id); $event.stopPropagation()" style="padding:6px 10px;font-size:14px">✏️</button>
               <button class="btn-icon" title="Eliminar" (click)="deleteRoutine(r.id, r.name); $event.stopPropagation()" style="padding:6px 10px;font-size:14px">🗑️</button>
             </div>

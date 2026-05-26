@@ -12,6 +12,7 @@ const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const axios_1 = require("@nestjs/axios");
+const throttler_1 = require("@nestjs/throttler");
 const health_module_1 = require("./health/health.module");
 const gyms_module_1 = require("./gyms/gyms.module");
 const users_module_1 = require("./users/users.module");
@@ -35,6 +36,9 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.local'] }),
+            throttler_1.ThrottlerModule.forRoot({
+                throttlers: [{ limit: 30, ttl: 60000 }],
+            }),
             axios_1.HttpModule,
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
@@ -69,6 +73,7 @@ exports.AppModule = AppModule = __decorate([
             { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },
             { provide: core_1.APP_GUARD, useClass: roles_guard_1.RolesGuard },
             { provide: core_1.APP_GUARD, useClass: tenant_guard_1.TenantGuard },
+            { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },
         ],
     })
 ], AppModule);

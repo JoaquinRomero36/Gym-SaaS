@@ -42,13 +42,13 @@ function newId() { return ++_id; }
             <button type="button" (click)="addExercise()" class="btn btn-ghost" style="color:var(--color-primary);font-weight:500">+ Agregar</button>
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="flex-col-gap">
             @for (e of exercises(); track e._id) {
               <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--color-bg);border-radius:var(--radius-md)">
-                <span style="font-size:13px;font-weight:700;color:var(--color-text-muted);width:20px;text-align:center">{{ e._id }}</span>
-                <input [(ngModel)]="e.name" [name]="'name_'+e._id" placeholder="Nombre" class="input" style="flex:1;font-size:13px;padding:8px 12px">
-                <input [(ngModel)]="e.sets" [name]="'sets_'+e._id" type="number" placeholder="S" class="input" style="width:56px;text-align:center;font-size:13px;padding:8px">
-                <input [(ngModel)]="e.reps" [name]="'reps_'+e._id" type="number" placeholder="R" class="input" style="width:56px;text-align:center;font-size:13px;padding:8px">
+                <span style="font-weight:700;color:var(--color-text-muted);width:20px;text-align:center">{{ e._id }}</span>
+                <input [(ngModel)]="e.name" [name]="'name_'+e._id" placeholder="Nombre" class="input" style="flex:1;padding:8px 12px">
+                <input [(ngModel)]="e.sets" [name]="'sets_'+e._id" type="number" placeholder="S" class="input" style="width:56px;text-align:center;padding:8px">
+                <input [(ngModel)]="e.reps" [name]="'reps_'+e._id" type="number" placeholder="R" class="input" style="width:56px;text-align:center;padding:8px">
                 <button type="button" (click)="removeExercise(e._id)" class="btn btn-ghost" style="color:var(--color-danger);padding:4px">✕</button>
               </div>
             }

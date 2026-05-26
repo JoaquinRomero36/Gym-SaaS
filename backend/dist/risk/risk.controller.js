@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RiskController = void 0;
 const common_1 = require("@nestjs/common");
+const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const risk_service_1 = require("./risk.service");
 const risk_score_entity_1 = require("./risk-score.entity");
 const users_service_1 = require("../users/users.service");
@@ -42,6 +43,7 @@ let RiskController = class RiskController {
 exports.RiskController = RiskController;
 __decorate([
     (0, common_1.Post)('calculate/:userId'),
+    (0, roles_decorator_1.Roles)('admin', 'coach'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -49,6 +51,7 @@ __decorate([
 ], RiskController.prototype, "calculate", null);
 __decorate([
     (0, common_1.Get)('all'),
+    (0, roles_decorator_1.Roles)('admin', 'coach'),
     __param(0, (0, common_1.Query)('category')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -56,6 +59,7 @@ __decorate([
 ], RiskController.prototype, "getAllScores", null);
 __decorate([
     (0, common_1.Get)(':userId'),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -63,6 +67,7 @@ __decorate([
 ], RiskController.prototype, "getLatest", null);
 __decorate([
     (0, common_1.Get)(':userId/features'),
+    (0, roles_decorator_1.Roles)('admin', 'coach'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

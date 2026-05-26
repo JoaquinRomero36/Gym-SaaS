@@ -43,6 +43,10 @@ __decorate([
     __metadata("design:type", Date)
 ], Gym.prototype, "createdAt", void 0);
 __decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: 'deleted_at' }),
+    __metadata("design:type", Date)
+], Gym.prototype, "deletedAt", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => user_entity_1.User, (u) => u.gym),
     __metadata("design:type", Array)
 ], Gym.prototype, "users", void 0);

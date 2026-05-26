@@ -26,6 +26,9 @@ let GymsService = class GymsService {
     async findAll() {
         return this.repo.find({ where: { id: this.tenantService.gymId } });
     }
+    async findAllPublic() {
+        return this.repo.find({ select: ['id', 'name'] });
+    }
     async findOne(id) {
         const g = await this.repo.findOne({ where: { id } });
         if (!g)
@@ -43,7 +46,11 @@ let GymsService = class GymsService {
         return this.findOne(id);
     }
     async remove(id) {
-        await this.repo.delete(id);
+        const gym = await this.findOne(id);
+        if (gym.id !== this.tenantService.gymId) {
+            throw new common_1.NotFoundException(`Gym ${id} not found`);
+        }
+        await this.repo.softDelete(id);
     }
 };
 exports.GymsService = GymsService;

@@ -14,5 +14,6 @@ export declare class RiskScore {
     score: number;
     category: RiskCategory;
     calculatedAt: Date;
+    deletedAt?: Date;
     features?: Record<string, unknown>;
 }

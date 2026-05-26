@@ -61,6 +61,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => exercise_entity_1.Exercise, (e) => e.routine),
     __metadata("design:type", Array)
 ], Routine.prototype, "exercises", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: 'deleted_at' }),
+    __metadata("design:type", Date)
+], Routine.prototype, "deletedAt", void 0);
 exports.Routine = Routine = __decorate([
     (0, typeorm_1.Entity)('routines')
 ], Routine);

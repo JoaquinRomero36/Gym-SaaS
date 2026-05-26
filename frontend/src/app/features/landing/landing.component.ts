@@ -57,7 +57,7 @@ import { RouterLink } from '@angular/router';
         </div>
       </section>
 
-      <footer style="border-top:1px solid var(--color-border);padding:24px;text-align:center;font-size:13px;color:var(--color-text-muted)">
+      <footer style="border-top:1px solid var(--color-border);padding:24px;text-align:center;color:var(--color-text-muted)">
         AI Gym Retention &mdash; Proyecto demo &bull; Angular + NestJS + Python
       </footer>
     </div>

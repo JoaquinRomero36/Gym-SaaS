@@ -66,7 +66,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'password_hash' }),
+    (0, typeorm_1.Column)({ name: 'password_hash', select: false }),
     __metadata("design:type", String)
 ], User.prototype, "passwordHash", void 0);
 __decorate([
@@ -98,6 +98,10 @@ __decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'joined_at' }),
     __metadata("design:type", Date)
 ], User.prototype, "joinedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: 'deleted_at' }),
+    __metadata("design:type", Date)
+], User.prototype, "deletedAt", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

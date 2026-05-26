@@ -24,20 +24,20 @@ let ExercisesService = class ExercisesService {
         this.tenantService = tenantService;
     }
     async create(dto) {
-        return this.repo.save(this.repo.create(dto));
+        return this.repo.save(this.repo.create({ ...dto, gym_id: this.tenantService.gymId }));
     }
     async createMany(dtos) {
-        const entities = dtos.map((d) => this.repo.create(d));
+        const entities = dtos.map((d) => this.repo.create({ ...d, gym_id: this.tenantService.gymId }));
         return this.repo.save(entities);
     }
     async findByRoutine(routineId) {
         return this.repo.find({
-            where: { routine_id: routineId },
+            where: { routine_id: routineId, gym_id: this.tenantService.gymId },
             order: { order: 'ASC' },
         });
     }
     async findOne(id) {
-        const e = await this.repo.findOne({ where: { id } });
+        const e = await this.repo.findOne({ where: { id, gym_id: this.tenantService.gymId } });
         if (!e)
             throw new common_1.NotFoundException(`Exercise ${id} not found`);
         return e;
@@ -47,7 +47,7 @@ let ExercisesService = class ExercisesService {
         return this.findOne(id);
     }
     async remove(id) {
-        await this.repo.delete(id);
+        await this.repo.softDelete({ id, gym_id: this.tenantService.gymId });
     }
 };
 exports.ExercisesService = ExercisesService;

@@ -30,7 +30,7 @@ import { AuthResponse } from '../../../core/types';
             </div>
 
             @if (error()) {
-              <div class="alert alert-danger">
+              <div class="alert alert-danger" role="alert" aria-live="polite">
                 {{ error() }}
               </div>
             }
@@ -44,14 +44,14 @@ import { AuthResponse } from '../../../core/types';
           </form>
 
           <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-light);text-align:center">
-            <p style="font-size:13px;color:var(--color-text-secondary);margin:0">
+            <p style="color:var(--color-text-secondary);margin:0">
               ¿No tenés cuenta? <a routerLink="/register" style="color:var(--color-primary);font-weight:500;text-decoration:none">Registrate</a>
             </p>
           </div>
 
           <div style="margin-top:16px;background:var(--color-bg);border-radius:var(--radius-md);padding:12px">
-            <p style="font-size:12px;font-weight:600;color:var(--color-text-secondary);margin:0 0 8px">Credenciales de prueba:</p>
-            <div style="font-size:12px;color:var(--color-text-muted);display:flex;flex-direction:column;gap:4px">
+            <p style="font-weight:600;color:var(--color-text-secondary);margin:0 0 8px">Credenciales de prueba:</p>
+            <div style="color:var(--color-text-muted);display:flex;flex-direction:column;gap:4px">
               <span>Admin: <strong style="color:var(--color-text)">admin&#64;gym.com / admin123</strong></span>
               <span>Coach: <strong style="color:var(--color-text)">coach&#64;gym.com / coach123</strong></span>
               <span>Member: <strong style="color:var(--color-text)">member&#64;gym.com / member123</strong></span>

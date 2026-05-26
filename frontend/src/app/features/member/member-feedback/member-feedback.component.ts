@@ -55,7 +55,7 @@ import { AuthService } from '../../../core/auth.service';
         </div>
 
         @if (sent()) {
-          <div style="background:var(--color-success-bg);color:var(--color-success);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+          <div style="background:var(--color-success-bg);color:var(--color-success);padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px;display:flex;align-items:center;gap:8px">
             ✅ ¡Feedback registrado! Seguí así 💪
           </div>
         }

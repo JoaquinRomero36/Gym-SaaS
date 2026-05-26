@@ -9,4 +9,5 @@ export declare class AttendanceLog {
     date: Date;
     completed: boolean;
     createdAt: Date;
+    deletedAt?: Date;
 }

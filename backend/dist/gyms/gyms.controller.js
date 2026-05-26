@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GymsController = void 0;
 const common_1 = require("@nestjs/common");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
+const public_decorator_1 = require("../common/decorators/public.decorator");
 const gyms_service_1 = require("./gyms.service");
 const dto_1 = require("./dto");
 let GymsController = class GymsController {
@@ -26,6 +27,9 @@ let GymsController = class GymsController {
     }
     async findAll() {
         return this.service.findAll();
+    }
+    async publicList() {
+        return this.service.findAllPublic();
     }
     async findOne(id) {
         return this.service.findOne(id);
@@ -53,6 +57,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], GymsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('public/list'),
+    (0, public_decorator_1.Public)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], GymsController.prototype, "publicList", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, roles_decorator_1.Roles)('admin'),

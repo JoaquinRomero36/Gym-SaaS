@@ -43,6 +43,9 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             order: { createdAt: 'DESC' },
         });
     }
+    async markAsRead(id) {
+        await this.repo.update(id, { status: 'read' });
+    }
     async markAsSent(id) {
         await this.repo.update(id, { status: 'sent', sentAt: new Date() });
     }

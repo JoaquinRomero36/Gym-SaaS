@@ -16,7 +16,7 @@ import { RouterLink } from '@angular/router';
         <p class="page-subtitle">Resumen de tu actividad en el gimnasio</p>
       </div>
 
-      <div class="grid-4" class="mb-24">
+      <div class="grid-4 mb-24">
         <div class="stat-card">
           <div class="stat-icon stat-icon-info">📅</div>
           <div>
@@ -47,7 +47,7 @@ import { RouterLink } from '@angular/router';
         </div>
       </div>
 
-      <div class="grid-2" class="mb-24">
+      <div class="grid-2 mb-24">
         <div class="card">
           <div class="card-header">
             <span class="card-title">Estado de riesgo</span>
@@ -55,11 +55,11 @@ import { RouterLink } from '@angular/router';
           <div class="progress-bar" style="margin:8px 0">
             <div class="progress-fill" [style.width.%]="riskBarWidth()" [style.background]="riskBarBg()"></div>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-muted)">
+          <div style="display:flex;justify-content:space-between;color:var(--color-text-muted)">
             <span>Bajo riesgo</span>
             <span>Alto riesgo</span>
           </div>
-          <p style="font-size:13px;color:var(--color-text-secondary);margin:12px 0 0">
+          <p style="color:var(--color-text-secondary);margin:12px 0 0">
             {{ riskMessage() }}
           </p>
         </div>
@@ -70,16 +70,16 @@ import { RouterLink } from '@angular/router';
           <div style="text-align:center;padding:16px 0">
             <div style="font-size:36px;margin-bottom:8px">🏋️</div>
             <div style="font-size:16px;font-weight:600">{{ lastDateLabel() }}</div>
-            <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px">{{ daysSinceLabel() }}</div>
+            <div style="color:var(--color-text-secondary);margin-top:4px">{{ daysSinceLabel() }}</div>
           </div>
         </div>
       </div>
 
       @if (notifications().length > 0) {
-        <div class="card" class="mb-24">
+        <div class="card mb-24">
           <div class="card-header">
             <span class="card-title">Notificaciones recientes</span>
-            <a [routerLink]="['/member/notifications']" style="font-size:13px;color:var(--color-primary);text-decoration:none">Ver todas</a>
+            <a [routerLink]="['/member/notifications']" style="color:var(--color-primary);text-decoration:none">Ver todas</a>
           </div>
           <div style="display:flex;flex-direction:column">
             @for (n of notifications().slice(0, 3); track n.id) {
@@ -87,7 +87,7 @@ import { RouterLink } from '@angular/router';
                 <span style="font-size:18px">{{ n.status === 'sent' ? '✅' : n.status === 'failed' ? '❌' : '⏳' }}</span>
                 <div style="flex:1;min-width:0">
                   <div style="font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ n.message }}</div>
-                  <div style="font-size:12px;color:var(--color-text-muted)">{{ formatDate(n.createdAt) }}</div>
+                  <div style="color:var(--color-text-muted)">{{ formatDate(n.createdAt) }}</div>
                 </div>
                 <span class="badge" [class.badge-success]="n.status === 'sent'" [class.badge-warning]="n.status === 'pending'" [class.badge-danger]="n.status === 'failed'">
                   {{ n.status }}
@@ -103,28 +103,28 @@ import { RouterLink } from '@angular/router';
           <div style="font-size:32px">💪</div>
           <div>
             <div style="font-weight:600;font-size:15px;margin-bottom:4px;color:var(--color-text)">Mi Rutina</div>
-            <div style="font-size:13px;color:var(--color-text-secondary)">Ver ejercicios asignados para hoy</div>
+            <div style="color:var(--color-text-secondary)">Ver ejercicios asignados para hoy</div>
           </div>
         </a>
         <a [routerLink]="['/member/feedback']" class="card card-hover" style="text-decoration:none;cursor:pointer;display:flex;align-items:center;gap:16px">
           <div style="font-size:32px">⭐</div>
           <div>
             <div style="font-weight:600;font-size:15px;margin-bottom:4px;color:var(--color-text)">Dar Feedback</div>
-            <div style="font-size:13px;color:var(--color-text-secondary)">Registrá tu esfuerzo y energía de hoy</div>
+            <div style="color:var(--color-text-secondary)">Registrá tu esfuerzo y energía de hoy</div>
           </div>
         </a>
         <a [routerLink]="['/member/progress']" class="card card-hover" style="text-decoration:none;cursor:pointer;display:flex;align-items:center;gap:16px">
           <div style="font-size:32px">📈</div>
           <div>
             <div style="font-weight:600;font-size:15px;margin-bottom:4px;color:var(--color-text)">Mi Progreso</div>
-            <div style="font-size:13px;color:var(--color-text-secondary)">Evolución detallada de tu rendimiento</div>
+            <div style="color:var(--color-text-secondary)">Evolución detallada de tu rendimiento</div>
           </div>
         </a>
         <a [routerLink]="['/member/notifications']" class="card card-hover" style="text-decoration:none;cursor:pointer;display:flex;align-items:center;gap:16px">
           <div style="font-size:32px">🔔</div>
           <div>
             <div style="font-weight:600;font-size:15px;margin-bottom:4px;color:var(--color-text)">Notificaciones</div>
-            <div style="font-size:13px;color:var(--color-text-secondary)">Historial de mensajes y alertas</div>
+            <div style="color:var(--color-text-secondary)">Historial de mensajes y alertas</div>
           </div>
         </a>
       </div>

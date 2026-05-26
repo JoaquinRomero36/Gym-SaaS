@@ -20,7 +20,7 @@ import { AuthService } from '../../../core/auth.service';
             <span style="font-size:28px">🎉</span>
             <div>
               <div style="font-weight:600;font-size:15px;color:var(--color-success)">¡Sesión completada!</div>
-              <div style="font-size:13px;color:var(--color-text-secondary)">Has registrado tu asistencia de hoy.</div>
+              <div style="color:var(--color-text-secondary)">Has registrado tu asistencia de hoy.</div>
             </div>
           </div>
         </div>
@@ -41,21 +41,21 @@ import { AuthService } from '../../../core/auth.service';
       }
 
       @for (r of routines(); track r.id) {
-        <div class="card" class="mb-24">
+        <div class="card mb-24">
           <div class="card-header">
             <div>
               <h2 style="font-size:17px;font-weight:600;margin:0 0 4px">{{ r.name }}</h2>
-              <span style="font-size:13px;color:var(--color-text-secondary)">{{ r.exercises?.length ?? 0 }} ejercicios</span>
+              <span style="color:var(--color-text-secondary)">{{ r.exercises?.length ?? 0 }} ejercicios</span>
             </div>
             <span class="badge badge-primary">Hoy</span>
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="flex-col-gap">
             @for (e of r.exercises; track e.id; let i = $index) {
               <label class="exercise-item" [class.done]="checkedExercises()[e.id]">
                 <div class="exercise-num">{{ i + 1 }}</div>
                 <input type="checkbox" style="width:16px;height:16px;accent-color:var(--color-primary);flex-shrink:0"
-                  [checked]="checkedExercises()[e.id]" (change)="toggleExercise(e.id)">
+                  [checked]="checkedExercises()[e.id]" (change)="toggleExercise(e.id)" [attr.aria-label]="'Marcar ' + e.name + ' como completado'">
                 <span style="flex:1;font-weight:500;font-size:14px">{{ e.name }}</span>
                 <span class="exercise-detail">{{ e.sets }} × {{ e.reps }}</span>
               </label>

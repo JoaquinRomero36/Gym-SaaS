@@ -6,6 +6,10 @@ export declare class GymsController {
     constructor(service: GymsService);
     create(dto: CreateGymDto): Promise<Gym>;
     findAll(): Promise<Gym[]>;
+    publicList(): Promise<{
+        id: string;
+        name: string;
+    }[]>;
     findOne(id: string): Promise<Gym>;
     update(id: string, dto: UpdateGymDto): Promise<Gym>;
     remove(id: string): Promise<void>;

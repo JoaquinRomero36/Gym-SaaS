@@ -10,6 +10,7 @@ export declare class Gym {
     name: string;
     plan: GymPlan;
     createdAt: Date;
+    deletedAt?: Date;
     users: User[];
     coaches: Coach[];
 }

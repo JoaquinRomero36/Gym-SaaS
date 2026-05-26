@@ -1,11 +1,13 @@
 import { Repository } from 'typeorm';
 import { TenantService } from '../common/services/tenant.service';
 import { User } from './user.entity';
+import { UpdateUserDto } from './dto';
 export declare class UsersService {
     private readonly repo;
     private readonly tenantService;
     constructor(repo: Repository<User>, tenantService: TenantService);
     findByEmail(email: string): Promise<User | null>;
+    findByEmailWithPassword(email: string): Promise<User | null>;
     findOne(id: string): Promise<User>;
     findAllByGym(gymId: string): Promise<User[]>;
     findAllByCoach(coachId: string): Promise<User[]>;
@@ -19,7 +21,7 @@ export declare class UsersService {
         level?: string;
         role?: string;
     }): Promise<User>;
-    update(id: string, data: Partial<User>): Promise<User>;
+    update(id: string, data: UpdateUserDto): Promise<User>;
     remove(id: string): Promise<void>;
     validatePassword(user: User, password: string): Promise<boolean>;
 }

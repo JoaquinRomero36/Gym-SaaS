@@ -64,6 +64,14 @@ let UsersService = class UsersService {
         }
         return this.repo.findOne({ where: { email } });
     }
+    async findByEmailWithPassword(email) {
+        const gymId = this.tenantService.safeGymId;
+        const query = this.repo.createQueryBuilder('user').addSelect('user.passwordHash');
+        if (gymId) {
+            return query.where('user.email = :email AND user.gym_id = :gymId', { email, gymId }).getOne();
+        }
+        return query.where('user.email = :email', { email }).getOne();
+    }
     async findOne(id) {
         const u = await this.repo.findOne({ where: { id, gym_id: this.tenantService.gymId } });
         if (!u)
@@ -99,7 +107,7 @@ let UsersService = class UsersService {
         return this.findOne(id);
     }
     async remove(id) {
-        await this.repo.delete(id);
+        await this.repo.softDelete({ id, gym_id: this.tenantService.gymId });
     }
     async validatePassword(user, password) {
         return bcrypt.compare(password, user.passwordHash);

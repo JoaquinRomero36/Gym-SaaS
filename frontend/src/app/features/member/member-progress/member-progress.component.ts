@@ -14,7 +14,7 @@ import { AuthService } from '../../../core/auth.service';
         <p class="page-subtitle">Historial de actividad, feedback y evolución</p>
       </div>
 
-      <div class="grid-4" class="mb-24">
+      <div class="grid-4 mb-24">
         <div class="stat-card">
           <div class="stat-icon stat-icon-info">📅</div>
           <div>
@@ -45,18 +45,18 @@ import { AuthService } from '../../../core/auth.service';
         </div>
       </div>
 
-      <div class="card" class="mb-24">
+      <div class="card mb-24">
         <div style="margin-bottom:12px;font-size:14px;font-weight:600;color:var(--color-text)">Estado de riesgo</div>
         <div class="progress-bar">
           <div class="progress-fill" [style.width.%]="riskBarWidth()" [style.background]="riskBarBg()"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-muted);margin-top:6px">
+        <div style="display:flex;justify-content:space-between;color:var(--color-text-muted);margin-top:6px">
           <span>Bajo riesgo</span>
           <span>Alto riesgo</span>
         </div>
       </div>
 
-      <div class="card" class="mb-24">
+      <div class="card mb-24">
         <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:var(--color-text)">Calendario de asistencias (últimos 30 días)</div>
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
           @for (d of calendarDays(); track d.label) {
@@ -73,19 +73,19 @@ import { AuthService } from '../../../core/auth.service';
       <div class="card">
         <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:var(--color-text)">Feedback recibido</div>
         @if (feedbackEntries().length === 0) {
-          <div style="color:var(--color-text-muted);font-size:13px;padding:8px 0">Aún no hay feedback registrado.</div>
+          <div style="color:var(--color-text-muted);padding:8px 0">Aún no hay feedback registrado.</div>
         }
-        <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="flex-col-gap">
           @for (f of feedbackEntries().slice(0, 10); track f.id) {
             <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--color-border-light);border-radius:var(--radius-md)">
               <span style="font-size:18px">{{ f.effort >= 4 ? '💪' : f.effort >= 2 ? '👍' : '😐' }}</span>
               <div style="flex:1">
-                <div style="display:flex;gap:12px;font-size:13px">
+                <div style="display:flex;gap:12px">
                   <span>Esfuerzo: <strong>{{ f.effort }}</strong>/5</span>
                   <span>Energía: <strong>{{ f.energy }}</strong>/5</span>
                 </div>
                 @if (f.comment) {
-                  <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">{{ f.comment }}</div>
+                  <div style="color:var(--color-text-secondary);margin-top:2px">{{ f.comment }}</div>
                 }
               </div>
               <span style="font-size:11px;color:var(--color-text-muted)">{{ formatDate(f.createdAt) }}</span>

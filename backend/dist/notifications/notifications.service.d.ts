@@ -13,6 +13,7 @@ export declare class NotificationsService {
         trigger: string;
     }): Promise<Notification>;
     findByUser(userId: string): Promise<Notification[]>;
+    markAsRead(id: string): Promise<void>;
     markAsSent(id: string): Promise<void>;
     markAsFailed(id: string): Promise<void>;
 }

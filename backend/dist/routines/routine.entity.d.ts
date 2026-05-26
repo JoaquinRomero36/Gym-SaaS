@@ -13,4 +13,5 @@ export declare class Routine {
     name: string;
     createdAt: Date;
     exercises: Exercise[];
+    deletedAt?: Date;
 }

@@ -14,20 +14,24 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
 const users_service_1 = require("../users/users.service");
+const tenant_service_1 = require("../common/services/tenant.service");
 let AuthService = class AuthService {
-    constructor(usersService, jwtService, config) {
+    constructor(usersService, jwtService, config, tenantService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
         this.config = config;
+        this.tenantService = tenantService;
     }
     async register(dto, role = 'member') {
         const user = await this.usersService.create(dto);
         return this.buildResponse(user, role);
     }
     async login(email, password) {
-        const user = await this.usersService.findByEmail(email);
+        const user = await this.usersService.findByEmailWithPassword(email);
         if (!user)
             throw new common_1.UnauthorizedException('Invalid credentials');
+        if (user.status !== 'active')
+            throw new common_1.UnauthorizedException('Account is not active');
         const valid = await this.usersService.validatePassword(user, password);
         if (!valid)
             throw new common_1.UnauthorizedException('Invalid credentials');
@@ -38,9 +42,10 @@ let AuthService = class AuthService {
             const payload = this.jwtService.verify(refreshToken, {
                 secret: this.config.get('JWT_REFRESH_SECRET'),
             });
-            const user = await this.usersService.findOne(payload.sub);
-            if (!user)
-                throw new common_1.UnauthorizedException();
+            const gymId = payload.gymId;
+            const user = await this.tenantService.runInTenantContext(gymId, () => {
+                return this.usersService.findOne(payload.sub);
+            });
             const access_token = this.jwtService.sign({
                 sub: user.id,
                 email: user.email,
@@ -76,6 +81,7 @@ exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [users_service_1.UsersService,
         jwt_1.JwtService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        tenant_service_1.TenantService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

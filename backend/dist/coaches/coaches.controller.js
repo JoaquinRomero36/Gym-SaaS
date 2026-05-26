@@ -26,7 +26,7 @@ let CoachesController = class CoachesController {
     async create(dto) {
         return this.service.create(dto);
     }
-    async findAll(gymId) {
+    async findAll() {
         return this.service.findAll();
     }
     async findOne(id) {
@@ -50,13 +50,14 @@ __decorate([
 ], CoachesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('gym_id')),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CoachesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

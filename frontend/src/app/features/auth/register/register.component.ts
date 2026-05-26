@@ -46,7 +46,7 @@ import { AuthResponse } from '../../../core/types';
             </div>
 
             @if (error()) {
-              <div class="alert alert-danger">
+              <div class="alert alert-danger" role="alert" aria-live="polite">
                 {{ error() }}
               </div>
             }
@@ -60,7 +60,7 @@ import { AuthResponse } from '../../../core/types';
           </form>
 
           <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-light);text-align:center">
-            <p style="font-size:13px;color:var(--color-text-secondary);margin:0">
+            <p style="color:var(--color-text-secondary);margin:0">
               ¿Ya tenés cuenta? <a routerLink="/login" style="color:var(--color-primary);font-weight:500;text-decoration:none">Ingresá</a>
             </p>
           </div>

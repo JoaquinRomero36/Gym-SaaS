@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FeedbackController = void 0;
 const common_1 = require("@nestjs/common");
+const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const feedback_service_1 = require("./feedback.service");
 const dto_1 = require("./dto");
 let FeedbackController = class FeedbackController {
@@ -44,6 +45,7 @@ let FeedbackController = class FeedbackController {
 exports.FeedbackController = FeedbackController;
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [dto_1.CreateFeedbackDto]),
@@ -51,6 +53,7 @@ __decorate([
 ], FeedbackController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)('user/:userId'),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -58,6 +61,7 @@ __decorate([
 ], FeedbackController.prototype, "findByUser", null);
 __decorate([
     (0, common_1.Get)('user/:userId/last'),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Query)('n')),
     __metadata("design:type", Function),
@@ -66,6 +70,7 @@ __decorate([
 ], FeedbackController.prototype, "getLastN", null);
 __decorate([
     (0, common_1.Get)('user/:userId/averages'),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Query)('last')),
     __metadata("design:type", Function),
@@ -74,6 +79,7 @@ __decorate([
 ], FeedbackController.prototype, "getAverages", null);
 __decorate([
     (0, common_1.Get)('user/:userId/count'),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Query)('days')),
     __metadata("design:type", Function),

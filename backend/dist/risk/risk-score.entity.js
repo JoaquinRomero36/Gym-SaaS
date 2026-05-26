@@ -65,6 +65,10 @@ __decorate([
     __metadata("design:type", Date)
 ], RiskScore.prototype, "calculatedAt", void 0);
 __decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: 'deleted_at' }),
+    __metadata("design:type", Date)
+], RiskScore.prototype, "deletedAt", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
     __metadata("design:type", Object)
 ], RiskScore.prototype, "features", void 0);

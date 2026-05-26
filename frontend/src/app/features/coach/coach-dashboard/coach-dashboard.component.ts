@@ -28,7 +28,7 @@ import { lastValueFrom } from 'rxjs';
         <p class="page-subtitle">{{ members().length }} miembros asignados</p>
       </div>
 
-      <div class="grid-3" class="mb-24">
+      <div class="grid-3 mb-24">
         <div class="stat-card">
           <div class="stat-icon stat-icon-primary">👥</div>
           <div>
@@ -60,14 +60,14 @@ import { lastValueFrom } from 'rxjs';
           <a routerLink="/coach/routines/create" class="btn btn-primary" style="margin-top:16px">+ Nueva rutina</a>
         </div>
       }
-      <div class="stagger" style="display:flex;flex-direction:column;gap:8px">
+      <div class="stagger flex-col-gap">
         @for (m of members(); track m.id) {
           <a [routerLink]="['/coach/members', m.id]" class="member-card">
             <div style="display:flex;align-items:center;gap:16px">
               <div class="avatar" style="background:var(--color-primary-bg);color:var(--color-primary)">{{ m.name.charAt(0) }}</div>
               <div>
                 <div style="font-weight:600;font-size:14px;margin-bottom:2px">{{ m.name }}</div>
-                <div style="font-size:13px;color:var(--color-text-secondary)">{{ m.email }} · {{ m.level }}</div>
+                <div style="color:var(--color-text-secondary)">{{ m.email }} · {{ m.level }}</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:12px">

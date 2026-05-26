@@ -11,7 +11,7 @@ import { AuthService } from '../../../core/auth.service';
   imports: [FormsModule],
   template: `
     <div class="animate-fade">
-      <div class="flex-between" class="mb-24">
+      <div class="flex-between mb-24">
         <div>
           <h1 class="page-title" style="margin:0">Coaches</h1>
           <p class="page-subtitle">{{ filteredCoaches().length }} coaches registrados</p>
@@ -50,8 +50,8 @@ import { AuthService } from '../../../core/auth.service';
                   <td style="font-weight:500">{{ c.name }}</td>
                   <td style="color:var(--color-text-secondary)">{{ c.email }}</td>
                   <td>
-                    <button class="btn btn-ghost" style="padding:4px 10px;font-size:13px" (click)="openEdit(c)">Editar</button>
-                    <button class="btn btn-ghost" style="padding:4px 10px;font-size:13px;color:var(--color-danger)" (click)="deleteCoach(c)">Eliminar</button>
+                    <button class="btn btn-ghost" style="padding:4px 10px" (click)="openEdit(c)">Editar</button>
+                    <button class="btn btn-ghost" style="padding:4px 10px;color:var(--color-danger)" (click)="deleteCoach(c)">Eliminar</button>
                   </td>
                 </tr>
               }
@@ -68,7 +68,7 @@ import { AuthService } from '../../../core/auth.service';
             <h2 class="modal-title">{{ editingCoach() ? 'Editar Coach' : 'Nuevo Coach' }}</h2>
             <button class="btn btn-ghost" (click)="closeForm()" style="padding:4px 8px">✕</button>
           </div>
-          <form (ngSubmit)="saveCoach()" style="display:flex;flex-direction:column;gap:16px">
+          <form (ngSubmit)="saveCoach()" class="flex-col-gap" style="gap:16px">
             <div class="input-group">
               <label class="input-label">Nombre</label>
               <input [(ngModel)]="formName" name="name" placeholder="Nombre completo" class="input" required>

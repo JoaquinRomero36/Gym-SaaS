@@ -15,7 +15,7 @@ import { RouterLink, Router } from '@angular/router';
         <p class="page-subtitle">Métricas globales del sistema</p>
       </div>
 
-      <div class="grid-3" class="mb-24">
+      <div class="grid-3 mb-24">
         <div class="stat-card">
           <div class="stat-icon stat-icon-primary">👥</div>
           <div>
@@ -39,7 +39,7 @@ import { RouterLink, Router } from '@angular/router';
         </div>
       </div>
 
-      <div class="grid-4" class="mb-24">
+      <div class="grid-4 mb-24">
         <div class="stat-card">
           <div class="stat-icon stat-icon-info">✅</div>
           <div>
@@ -70,7 +70,7 @@ import { RouterLink, Router } from '@angular/router';
         </div>
       </div>
 
-      <div class="grid-2" class="mb-24">
+      <div class="grid-2 mb-24">
         <div class="card">
           <div class="card-header">
             <span class="card-title">Desglose por estado</span>
@@ -110,7 +110,7 @@ import { RouterLink, Router } from '@angular/router';
             <span class="card-title">Usuarios con mayor riesgo</span>
           </div>
           <div style="display:flex;flex-direction:column">
-            <div style="display:grid;grid-template-columns:1fr 80px 90px 80px;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-border-light);font-size:12px;color:var(--color-text-muted);font-weight:600;text-transform:uppercase">
+            <div style="display:grid;grid-template-columns:1fr 80px 90px 80px;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-border-light);color:var(--color-text-muted);font-weight:600;text-transform:uppercase">
               <span>Nombre</span>
               <span style="text-align:center">Score</span>
               <span style="text-align:center">Categoría</span>
@@ -126,7 +126,7 @@ import { RouterLink, Router } from '@angular/router';
                   </span>
                 </span>
                 <span style="text-align:center">
-                  <button class="btn btn-ghost" style="padding:4px 8px;font-size:12px" (click)="viewUser(r.userId)" [title]="'Ver perfil de ' + r.userName" [attr.aria-label]="'Ver perfil de ' + r.userName">👁️</button>
+                  <button class="btn btn-ghost" style="padding:4px 8px" (click)="viewUser(r.userId)" [title]="'Ver perfil de ' + r.userName" [attr.aria-label]="'Ver perfil de ' + r.userName">👁️</button>
                 </span>
               </div>
             }

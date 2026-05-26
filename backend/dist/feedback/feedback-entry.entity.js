@@ -60,6 +60,10 @@ __decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'created_at' }),
     __metadata("design:type", Date)
 ], FeedbackEntry.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: 'deleted_at' }),
+    __metadata("design:type", Date)
+], FeedbackEntry.prototype, "deletedAt", void 0);
 exports.FeedbackEntry = FeedbackEntry = __decorate([
     (0, typeorm_1.Entity)('feedback_entries')
 ], FeedbackEntry);

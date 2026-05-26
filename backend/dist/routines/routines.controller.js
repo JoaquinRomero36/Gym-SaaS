@@ -51,6 +51,7 @@ __decorate([
 ], RoutinesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Query)('user_id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -58,6 +59,7 @@ __decorate([
 ], RoutinesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, roles_decorator_1.Roles)('admin', 'coach', 'member'),
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

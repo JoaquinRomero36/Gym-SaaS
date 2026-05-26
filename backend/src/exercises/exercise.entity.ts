@@ -11,9 +11,9 @@ export class Exercise {
   @JoinColumn({ name: 'gym_id' })
   gym!: Gym;
 
-  @Column({ name: 'gym_id' })
+  @Column({ name: 'gym_id', nullable: true })
   @Index()
-  gym_id!: string;
+  gym_id?: string;
 
   @ManyToOne(() => Routine, (r) => r.exercises, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'routine_id' })

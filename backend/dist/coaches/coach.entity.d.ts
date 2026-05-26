@@ -9,4 +9,5 @@ export declare class Coach {
     passwordHash?: string;
     users: User[];
     createdAt: Date;
+    deletedAt?: Date;
 }

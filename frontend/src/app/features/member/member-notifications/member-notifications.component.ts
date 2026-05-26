@@ -22,7 +22,7 @@ import { AuthService } from '../../../core/auth.service';
         </div>
       }
 
-      <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="flex-col-gap" style="gap:12px">
         @for (n of notifications(); track n.id) {
           <div class="notif-item" [class.notif-read]="n.status === 'read'" (click)="markRead(n)" style="cursor:pointer"
                [style.border-left]="'4px solid ' + (n.status === 'pending' ? 'var(--color-primary)' : n.status === 'read' ? 'var(--color-text-muted)' : n.status === 'sent' ? 'var(--color-success)' : 'var(--color-danger)')"
@@ -33,7 +33,7 @@ import { AuthService } from '../../../core/auth.service';
             <div class="notif-content">
               <p class="notif-message" [style.fontWeight]="n.status === 'read' ? '400' : '600'">{{ n.message }}</p>
               <div class="notif-meta">
-                <span style="font-size:12px;color:var(--color-text-muted)">{{ formatDate(n.createdAt) }}</span>
+                <span style="color:var(--color-text-muted)">{{ formatDate(n.createdAt) }}</span>
                 <span class="badge" [class.badge-primary]="n.trigger === 'high_risk'"
                       [class.badge-success]="n.trigger === 'milestone'"
                       [class.badge-neutral]="n.trigger === 'manual'">

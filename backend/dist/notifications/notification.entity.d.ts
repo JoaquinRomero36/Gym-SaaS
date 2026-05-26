@@ -29,4 +29,5 @@ export declare class Notification {
     status: NotificationStatus;
     sentAt?: Date;
     createdAt: Date;
+    deletedAt?: Date;
 }
