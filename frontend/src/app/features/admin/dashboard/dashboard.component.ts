@@ -1,7 +1,7 @@
 import { Component, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -90,29 +90,15 @@ import { RouterLink } from '@angular/router';
         </div>
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Resumen rápido</span>
+            <span class="card-title">Acciones rápidas</span>
           </div>
-          <div style="display:flex;flex-direction:column;gap:12px;padding:8px 0">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
-              <span style="font-size:14px;color:var(--color-text-secondary)">Miembros</span>
-              <span style="font-weight:600;font-size:16px">{{ stats()?.totalMembers ?? '-' }}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
-              <span style="font-size:14px;color:var(--color-text-secondary)">Coaches</span>
-              <span style="font-weight:600;font-size:16px">{{ stats()?.totalCoaches ?? '-' }}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
-              <span style="font-size:14px;color:var(--color-text-secondary)">Riesgo medio</span>
-              <span style="font-weight:600;font-size:16px;color:#d97706">{{ stats()?.usersAtMediumRisk ?? '-' }}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
-              <span style="font-size:14px;color:var(--color-text-secondary)">Riesgo bajo</span>
-              <span style="font-weight:600;font-size:16px;color:#059669">{{ stats()?.usersAtLowRisk ?? '-' }}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">
-              <span style="font-size:14px;color:var(--color-text-secondary)">Inactivos</span>
-              <span style="font-weight:600;font-size:16px;color:#94a3b8">{{ stats()?.inactiveUsers ?? '-' }}</span>
-            </div>
+          <div style="display:flex;flex-direction:column;gap:8px;padding:8px 0">
+            <a routerLink="/admin/coaches" class="btn btn-ghost" style="justify-content:flex-start;padding:12px 16px">
+              👥 Gestionar coaches
+            </a>
+            <a routerLink="/coach/routines" class="btn btn-ghost" style="justify-content:flex-start;padding:12px 16px">
+              📋 Ver rutinas
+            </a>
           </div>
         </div>
       </div>
@@ -123,19 +109,23 @@ import { RouterLink } from '@angular/router';
             <span class="card-title">Usuarios con mayor riesgo</span>
           </div>
           <div style="display:flex;flex-direction:column">
-            <div style="display:grid;grid-template-columns:1fr 100px 100px;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-border-light);font-size:12px;color:var(--color-text-muted);font-weight:600;text-transform:uppercase">
+            <div style="display:grid;grid-template-columns:1fr 80px 90px 80px;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-border-light);font-size:12px;color:var(--color-text-muted);font-weight:600;text-transform:uppercase">
               <span>Nombre</span>
               <span style="text-align:center">Score</span>
               <span style="text-align:center">Categoría</span>
+              <span style="text-align:center">Acción</span>
             </div>
             @for (r of stats()?.recentRisks ?? []; track r.userId) {
-              <div style="display:grid;grid-template-columns:1fr 100px 100px;gap:8px;padding:10px 0;border-bottom:1px solid var(--color-border-light);align-items:center">
+              <div style="display:grid;grid-template-columns:1fr 80px 90px 80px;gap:8px;padding:10px 0;border-bottom:1px solid var(--color-border-light);align-items:center">
                 <span style="font-size:14px;font-weight:500">{{ r.userName }}</span>
-                <span style="text-align:center;font-size:14px;font-weight:600" [style.color]="riskScoreColor(r.score)">{{ r.score.toFixed(4) }}</span>
+                <span style="text-align:center;font-size:14px;font-weight:600" [style.color]="riskScoreColor(r.score)">{{ r.score.toFixed(2) }}</span>
                 <span style="text-align:center">
                   <span class="badge" [class.badge-danger]="r.category === 'high'" [class.badge-warning]="r.category === 'medium'" [class.badge-success]="r.category === 'low'">
                     {{ r.category }}
                   </span>
+                </span>
+                <span style="text-align:center">
+                  <button class="btn btn-ghost" style="padding:4px 8px;font-size:12px" (click)="viewUser(r.userId)" [title]="'Ver perfil de ' + r.userName" [attr.aria-label]="'Ver perfil de ' + r.userName">👁️</button>
                 </span>
               </div>
             }
@@ -147,6 +137,7 @@ import { RouterLink } from '@angular/router';
 })
 export class DashboardComponent {
   private http = inject(HttpClient);
+  private router = inject(Router);
   stats = toSignal(this.http.get<any>('/api/v1/stats'));
 
   statusBreakdown = computed(() => {
@@ -164,5 +155,9 @@ export class DashboardComponent {
     if (score >= 0.7) return '#dc2626';
     if (score >= 0.4) return '#d97706';
     return '#059669';
+  }
+
+  viewUser(userId: string) {
+    this.router.navigate(['/coach/members', userId]);
   }
 }

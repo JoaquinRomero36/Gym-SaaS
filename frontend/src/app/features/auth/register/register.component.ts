@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../../../core/auth.service';
 import { AuthResponse } from '../../../core/types';
@@ -32,6 +34,15 @@ import { AuthResponse } from '../../../core/types';
               <label class="input-label">Contraseña</label>
               <input [(ngModel)]="password" name="password" type="password" placeholder="••••••••" class="input" required>
             </div>
+            <div class="input-group">
+              <label class="input-label">Gimnasio</label>
+              <select [(ngModel)]="gymId" name="gymId" class="input" required>
+                <option value="">Seleccioná un gimnasio</option>
+                @for (g of gyms(); track g.id) {
+                  <option [value]="g.id">{{ g.name }}</option>
+                }
+              </select>
+            </div>
 
             @if (error()) {
               <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px">
@@ -58,14 +69,17 @@ import { AuthResponse } from '../../../core/types';
   `,
 })
 export class RegisterComponent {
+  private http = inject(HttpClient);
   private auth = inject(AuthService);
   private router = inject(Router);
-  name = ''; email = ''; password = '';
+  name = ''; email = ''; password = ''; gymId = '';
+  gyms = toSignal(this.http.get<any[]>('/api/v1/gyms/public/list'), { initialValue: [] });
   error = signal(''); success = signal('');
 
   onSubmit() {
     this.error.set(''); this.success.set('');
-    this.auth.register({ gym_id: '', name: this.name, email: this.email, password: this.password })
+    if (!this.gymId) { this.error.set('Seleccioná un gimnasio para registrarte.'); return; }
+    this.auth.register({ gym_id: this.gymId, name: this.name, email: this.email, password: this.password })
       .pipe(
         catchError(err => {
           this.error.set(err.status === 400 ? 'El ID de gym es obligatorio. Usá el seed para crear uno.' : 'Error al registrarse. Intentá de nuevo.');

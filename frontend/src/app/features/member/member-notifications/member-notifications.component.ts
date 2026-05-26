@@ -23,12 +23,14 @@ import { AuthService } from '../../../core/auth.service';
 
       <div style="display:flex;flex-direction:column;gap:12px">
         @for (n of notifications(); track n.id) {
-          <div class="notif-item" [style.border-left]="'4px solid ' + (n.status === 'pending' ? '#4f46e5' : n.status === 'sent' ? '#059669' : '#dc2626')">
-            <div class="notif-dot" [style.background]="n.status === 'pending' ? '#eef2ff' : n.status === 'sent' ? '#ecfdf5' : '#fef2f2'">
-              {{ n.status === 'pending' ? '⏳' : n.status === 'sent' ? '✅' : '❌' }}
+          <div class="notif-item" [class.notif-read]="n.status === 'read'" (click)="markRead(n)" style="cursor:pointer"
+               [style.border-left]="'4px solid ' + (n.status === 'pending' ? '#4f46e5' : n.status === 'read' ? '#94a3b8' : n.status === 'sent' ? '#059669' : '#dc2626')"
+               [attr.aria-label]="'Notificación: ' + n.message + '. ' + (n.status === 'read' ? 'Leída' : 'Haz clic para marcar como leída')">
+            <div class="notif-dot" [style.background]="n.status === 'pending' ? '#eef2ff' : n.status === 'read' ? '#f1f5f9' : n.status === 'sent' ? '#ecfdf5' : '#fef2f2'">
+              {{ n.status === 'pending' ? '⏳' : n.status === 'read' ? '👁️' : n.status === 'sent' ? '✅' : '❌' }}
             </div>
             <div class="notif-content">
-              <p class="notif-message">{{ n.message }}</p>
+              <p class="notif-message" [style.fontWeight]="n.status === 'read' ? '400' : '600'">{{ n.message }}</p>
               <div class="notif-meta">
                 <span style="font-size:12px;color:var(--color-text-muted)">{{ formatDate(n.createdAt) }}</span>
                 <span class="badge" [class.badge-primary]="n.trigger === 'high_risk'"
@@ -38,8 +40,9 @@ import { AuthService } from '../../../core/auth.service';
                 </span>
                 <span class="badge" [class.badge-warning]="n.status === 'pending'"
                       [class.badge-success]="n.status === 'sent'"
-                      [class.badge-danger]="n.status === 'failed'">
-                  {{ n.status }}
+                      [class.badge-danger]="n.status === 'failed'"
+                      [class.badge-neutral]="n.status === 'read'">
+                  {{ n.status === 'read' ? 'leída' : n.status }}
                 </span>
               </div>
             </div>
@@ -59,5 +62,11 @@ export class MemberNotificationsComponent {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  markRead(n: any) {
+    if (n.status === 'read') return;
+    this.http.patch(`/api/v1/notifications/${n.id}/read`, {}).subscribe();
+    n.status = 'read';
   }
 }

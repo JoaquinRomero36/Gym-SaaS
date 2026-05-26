@@ -77,11 +77,11 @@ import { lastValueFrom } from 'rxjs';
                   riesgo: {{ (risk * 100).toFixed(0) }}%
                 </span>
               }
-              <button type="button" class="quick-btn" [class.loading]="loadingCalc().has(m.id)" (click)="calculateRisk($event, m)" style="margin-right:4px" title="Calcular riesgo">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+              <button type="button" class="quick-btn" [class.loading]="loadingCalc().has(m.id)" (click)="calculateRisk($event, m)" style="margin-right:4px" title="Calcular riesgo" [attr.aria-label]="'Calcular riesgo de ' + m.name">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
               </button>
-              <button type="button" class="quick-btn" [class.loading]="loadingMsg().has(m.id)" (click)="sendMessage($event, m)" style="margin-right:4px" title="Enviar mensaje">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              <button type="button" class="quick-btn" [class.loading]="loadingMsg().has(m.id)" (click)="sendMessage($event, m)" style="margin-right:4px" title="Enviar mensaje" [attr.aria-label]="'Enviar mensaje a ' + m.name">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
               </button>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
                 <path d="M9 5l7 7-7 7"/>

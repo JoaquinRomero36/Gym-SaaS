@@ -24,6 +24,12 @@ export class GymsController {
     return this.service.findAll();
   }
 
+  @Get('public/list')
+  @Public()
+  async publicList(): Promise<{ id: string; name: string }[]> {
+    return this.service.findAllPublic();
+  }
+
   @Get(':id')
   @Roles('admin')
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Gym> {

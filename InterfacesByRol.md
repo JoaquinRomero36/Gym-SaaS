@@ -1,451 +1,604 @@
-# Interfaces por Rol
+# Interfaces por Rol — AI Gym Retention
 
-## Estructura común (App Shell)
-
-Toda ruta protegida (`/admin/*`, `/coach/*`, `/member/*`) comparte el mismo layout:
-
-```
-┌─────────────────────────────────────────────┐
-│               Navbar                        │
-│  [G] AI Gym Retention  [rol]  [nombre] [⏻] │
-├──────────┬──────────────────────────────────┤
-│          │                                  │
-│ Sidebar  │         <router-outlet>          │
-│ (ítems   │       (contenido de cada         │
-│  según   │        interfaz)                 │
-│  rol)    │                                  │
-│          │                                  │
-└──────────┴──────────────────────────────────┘
-```
-
-### Navbar (siempre visible)
-- Logo + nombre app
-- Badge del rol
-- Nombre del usuario autenticado
-- Botón de cerrar sesión (llama `auth.logout()` → redirige a `/login`)
-
-### Sidebar (según rol)
-
-| Rol | Ítems en sidebar |
-|-----|-----------------|
-| **Admin** | Dashboard (`/admin/dashboard`), Coaches (`/admin/coaches`) |
-| **Coach** | Dashboard (`/coach/dashboard`), Rutinas (`/coach/routines`), Nueva Rutina (`/coach/routines/create`) |
-| **Member** | Dashboard (`/member/dashboard`), Mi Rutina (`/member/routine`), Feedback (`/member/feedback`), Progreso (`/member/progress`), Notificaciones (`/member/notifications`) |
-
-Footer del sidebar: "AI Gym Retention v1.0"
+> Documento de análisis y guía para refactorización del frontend.
+> Basado en: Web Interface Guidelines + Frontend Design Skill + auditoría completa del código.
 
 ---
 
-## Interfaces Públicas (sin autenticación)
+## Arquitectura general
 
-### 1. Landing Page (`/`)
-**Ruta**: `''`
-**Componente**: `LandingComponent`
+Toda ruta protegida (`/admin/*`, `/coach/*`, `/member/*`) comparte un **App Shell**:
 
-**Propósito**: Página de aterrizaje/marketing.
+```
+┌───────────────────────────────────────────────────────┐
+│  Navbar: [G] AI Gym Retention  [rol]  [nombre] [⏻]   │
+├──────────┬────────────────────────────────────────────┤
+│          │                                            │
+│ Sidebar  │         <router-outlet>                    │
+│ (items   │       (contenido de cada interfaz)         │
+│  según   │                                            │
+│  rol)    │                                            │
+│          │                                            │
+└──────────┴────────────────────────────────────────────┘
+```
 
-**Contenido**:
-- Hero con título "Reducí la deserción con inteligencia artificial"
-- Tres cards de features: Predicción de abandono, Mensajería automatizada, Multi-tenant SaaS
-- Footer
+### Componentes compartidos
 
-**Acciones**:
-| Elemento | Acción | Destino |
-|----------|--------|---------|
-| "Ingresar" | Navegación | `/login` |
-| "Registrarse" | Navegación | `/register` |
+| Componente | Ruta | Props/Inputs |
+|---|---|---|
+| `NavbarComponent` | `shared/navbar.component.ts` | `role`, `userName`, `logout` output |
+| `SidebarComponent` | `shared/sidebar.component.ts` | `items: NavItem[]` |
+| `LayoutComponent` | `shared/layout.component.ts` | Wrapper: navbar + sidebar + router-outlet |
+
+### Diseño system (CSS custom properties)
+
+`styles.css` define un design system completo con:
+
+| Categoría | Variables |
+|---|---|
+| Brand | `--color-primary: #4f46e5` (indigo), `--color-primary-dark`, `--color-primary-light` |
+| Semantic | `--color-success: #059669`, `--color-warning: #d97706`, `--color-danger: #dc2626` |
+| Neutral | `--color-bg: #f8fafc`, `--color-surface: #ffffff`, `--color-border: #e2e8f0` |
+| Shadows | `--shadow-sm` a `--shadow-xl` |
+| Radius | `--radius-sm: 6px` a `--radius-xl: 16px` |
+| Font | `--font-sans: 'Inter', system-ui, ...` |
+
+**Problema**: Inter es genérica. Las guidelines de frontend-design recomiendan tipografías con más personalidad.
+
+---
+
+## Auditoría de Web Interface Guidelines
+
+Violaciones encontradas en el código actual:
+
+### Accesibilidad
+
+```
+src/app/features/coach/coach-dashboard/coach-dashboard.component.ts:80 - icon button "Calcular riesgo" sin aria-label
+src/app/features/coach/coach-dashboard/coach-dashboard.component.ts:83 - icon button "Enviar mensaje" sin aria-label
+src/app/shared/navbar.component.ts:18 - botón "Salir" sin aria-label en SVG icon
+src/app/features/coach/member-detail/member-detail.component.ts:13 - avatar decorativo sin aria-hidden
+src/app/features/admin/coaches/coaches.component.ts:38 - badge de gym_id truncado sin title tooltip
+```
+
+### Focus States
+
+```
+src/app/styles.css:178 - .input:focus solo usa box-shadow sin outline visible alternativo
+src/app/features/member/member-routine/member-routine.component.ts:51 - checkbox sin focus-visible styling
+src/app/features/coach/routine-create/routine-create.component.ts:47-49 - inputs sin focus-visible styling
+```
+
+### Formularios
+
+```
+src/app/features/auth/login/login.component.ts:24-28 - inputs sin autocomplete (email, password)
+src/app/features/auth/register/register.component.ts:25-33 - inputs sin autocomplete
+src/app/features/coach/routine-create/routine-create.component.ts:24 - input gym_id sin autocomplete="off"
+src/app/features/auth/register/register.component.ts:68 - gym_id enviado vacío, sin validación frontend
+src/app/features/coach/routine-create/routine-create.component.ts:84 - validación manual sin mensajes inline por campo
+```
+
+### Content Handling
+
+```
+src/app/features/admin/dashboard/dashboard.component.ts:134 - score.toFixed(4) muestra muchos decimales
+src/app/features/admin/coaches/coaches.component.ts:38 - gym_id truncado sin title completo
+src/app/features/member/member-dashboard/member-dashboard.component.ts:88 - notif message con text-overflow:ellipsis sin tooltip
+src/app/features/member/member-routine/member-routine.component.ts:94 - alert() en lugar de UI inline para error
+```
+
+### Performance
+
+```
+src/app/features/admin/dashboard/dashboard.component.ts:150 - sin paginación en stats (carga todo)
+src/app/features/coach/coach-dashboard/coach-dashboard.component.ts:100-101 - sin paginación en members/risks
+src/app/features/admin/coaches/coaches.component.ts:50 - sin paginación en coaches
+src/app/features/member/member-notifications/member-notifications.component.ts:56 - sin paginación en notifications
+```
+
+### Navigation & State
+
+```
+src/app/features/coach/coach-dashboard/coach-dashboard.component.ts:122-123 - calculateRisk recrea signal completa en vez de actualizar
+src/app/features/member/member-routine/member-routine.component.ts:83-86 - fecha hardcodeada sin timezone handling
+src/app/features/member/member-routine/member-routine.component.ts:94 - alert() sin confirmación para acción destructiva
+```
+
+### Animation / prefers-reduced-motion
+
+```
+src/app/styles.css:324-338 - @keyframes fadeIn y slideIn sin consultar prefers-reduced-motion
+src/app/features/auth/register/register.component.ts:15 - animación fadeIn sin @media (prefers-reduced-motion: no-preference)
+```
+
+### Dark Mode
+
+```
+src/app/styles.css:9-49 - Sin variables de tema oscuro
+src/index.html:8 - Sin <meta name="theme-color"> ni color-scheme
+```
+
+### i18n / Locale
+
+```
+src/app/styles.css:651 - clamp() usa 5vw sin fallback para navegadores antiguos
+src/app/features/member/member-routine/member-routine.component.ts:82 - toISOString() sin considerar timezone del usuario
+```
+
+---
+
+## Sidebar por rol
+
+| Rol | Items |
+|---|---|
+| **Admin** | 📊 Dashboard (`/admin/dashboard`), 👥 Coaches (`/admin/coaches`) |
+| **Coach** | 📊 Dashboard (`/coach/dashboard`), 📋 Rutinas (`/coach/routines`), ➕ Nueva Rutina (`/coach/routines/create`) |
+| **Member** | 📊 Dashboard (`/member/dashboard`), 💪 Mi Rutina (`/member/routine`), ⭐ Feedback (`/member/feedback`), 📈 Progreso (`/member/progress`), 🔔 Notificaciones (`/member/notifications`) |
+
+Footer: "AI Gym Retention v1.0"
+
+---
+
+## Interfaces Públicas
+
+### Landing Page (`/`)
+**Componente**: `LandingComponent` (standalone, imports: `RouterLink`)
+
+**Propósito**: Página de aterrizaje / marketing.
 
 **API calls**: Ninguna.
 
+**Contenido actual**:
+- Navbar con logo "G" + "AI Gym Retention" + botones Ingresar/Registrarse
+- Hero: "Reducí la deserción con inteligencia artificial"
+- Badge flotante: "🤖 IA aplicada a retención de clientes"
+- Subtítulo explicativo
+- 2 CTAs: "Comenzá gratis" / "Ya tengo cuenta"
+- 3 feature cards: Predicción de abandono, Mensajería automatizada, Multi-tenant SaaS
+- Footer con copyright
+
+**Acciones**:
+| Elemento | Tipo | Destino | Problemas |
+|---|---|---|---|
+| "Ingresar" | `<a routerLink>` | `/login` | ✅ |
+| "Registrarse" | `<a routerLink>` | `/register` | ✅ |
+| "Comenzá gratis" | `<a routerLink>` | `/register` | ✅ |
+| "Ya tengo cuenta" | `<a routerLink>` | `/login` | ✅ |
+
+**Problemas de UI/UX**:
+- Sin `prefers-reduced-motion` en animaciones
+- Sin tipografía distintiva (usa Inter del design system)
+- Sin imágenes/ilustraciones que acompañen
+- Footer sin links útiles
+- Sin favicon definido
+
 ---
 
-### 2. Login (`/login`)
-**Ruta**: `'login'`
-**Componente**: `LoginComponent`
+### Login (`/login`)
+**Componente**: `LoginComponent` (standalone, imports: `FormsModule`, `RouterLink`)
 
 **Propósito**: Autenticación de usuarios.
 
-**Contenido**:
-- Formulario: email + password (ngModel)
-- Botón submit con spinner de carga
-- Panel de credenciales de prueba (admin@gym.com, coach@gym.com, member@gym.com)
-- Enlace a registro
+**API calls**: `POST /api/v1/auth/login` → `{ access_token, refresh_token, user: { id, email, name, role, gymId } }`
+
+**Formulario**:
+| Campo | Type | autocomplete | Validación |
+|---|---|---|---|
+| Email | `email` | ❌ falta | `required` |
+| Password | `password` | ❌ falta | `required` |
 
 **Acciones**:
 | Elemento | Acción | Resultado |
-|----------|--------|-----------|
-| Submit login | `POST /api/v1/auth/login` | Guarda token + user en localStorage, redirige a `/${rol}/dashboard` |
-| Link "Registrarse" | Navegación | `/register` |
+|---|---|---|
+| Submit | `auth.login({ email, password })` | Guarda en localStorage, redirige a `/${role}/dashboard` |
+| Link "Registrate" | Navigate | `/register` |
 
-**Flujo post-login**:
+**Post-login routing**:
 - `admin` → `/admin/dashboard`
 - `coach` → `/coach/dashboard`
 - `member` → `/member/dashboard`
-- Error → muestra mensaje "Credenciales inválidas"
 
-**Rate limit**: 10 intentos por minuto.
+**Estado**: `loading` signal (deshabilita botón + muestra spinner), `error` signal (muestra mensaje inline).
+
+**Rate limit**: 10 req/min.
+
+**Problemas**:
+- Sin `autocomplete` en inputs → los password managers no sugieren credenciales
+- No hay "olvidé mi contraseña"
+- Las credenciales de prueba en texto plano son útiles para dev pero peligrosas en prod
+- Sin validación de email format antes de enviar
+- Sin `type="submit"` explícito en el botón (el form ngSubmit lo maneja, pero semánticamente)
 
 ---
 
-### 3. Register (`/register`)
-**Ruta**: `'register'`
-**Componente**: `RegisterComponent`
+### Register (`/register`)
+**Componente**: `RegisterComponent` (standalone, imports: `FormsModule`, `RouterLink`)
 
 **Propósito**: Creación de cuenta nueva.
 
-**Contenido**:
-- Formulario: nombre, email, password
-- Mensajes de error/success
-- Enlace a login
-
-**Acciones**:
-| Elemento | Acción | Resultado |
-|----------|--------|-----------|
-| Submit register | `POST /api/v1/auth/register` | Muestra success, redirige a `/login` tras 1.5s |
-| Link "Ingresar" | Navegación | `/login` |
-
-**Nota**: El campo `gym_id` se envía vacío en el frontend actual — el registro sin gym_id puede fallar si el backend lo requiere.
-
-**Rate limit**: 5 registros por minuto.
-
----
-
-## Interfaces Admin (`/admin/*`)
-
-**Requisito**: Rol `admin` en JWT.
-**Sidebar**: Dashboard, Coaches.
-
----
-
-### 1. Admin Dashboard (`/admin/dashboard`)
-**Ruta**: `'admin/dashboard'`
-**Componente**: `DashboardComponent` (admin)
-
-**Propósito**: Visión general del gimnasio con métricas clave.
-
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/stats` | Métricas globales del gym |
-
-**Cards de métricas** (6 tarjetas):
-| Métrica | Descripción |
-|---------|-------------|
-| Total Usuarios | Cantidad total de miembros |
-| Usuarios Activos | Miembros con status `active` |
-| Usuarios Churned | Miembros con status `churned` |
-| Asistencia Hoy | Attendance logs de la fecha actual |
-| Usuarios en Riesgo Alto | Risk scores con category `high` |
-| Notificaciones Hoy | Notificaciones creadas hoy |
-
-**Desglose por estado**: Progress bars con porcentajes de Activos / Inactivos / Churned.
-
-**Tabla de usuarios en riesgo**: Lista de los 10 miembros con mayor score de riesgo, con columnas: nombre, score (formateado), categoría (high/medium/low con badge de color).
-
-**Acciones**:
-| Elemento | Acción |
-|----------|--------|
-| Cards | Read-only (solo display) |
-| Tabla riesgos | Read-only |
-
-**Navegación desde aquí**: Sidebar (Coaches).
-
----
-
-### 2. Admin Coaches (`/admin/coaches`)
-**Ruta**: `'admin/coaches'`
-**Componente**: `CoachesComponent`
-
-**Propósito**: Listar todos los coaches del gimnasio.
-
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/coaches` | Lista de coaches |
-
-**Contenido**:
-- Tabla con columnas: Nombre, Email, Gym ID (truncado)
-
-**Acciones**:
-| Elemento | Acción |
-|----------|--------|
-| Tabla coaches | Read-only (solo display) |
-
-**Problemas actuales**:
-- No permite crear/editar/eliminar coaches (solo lectura)
-- No muestra métricas por coach (miembros asignados, etc.)
-
----
-
-## Interfaces Coach (`/coach/*`)
-
-**Requisito**: Rol `coach` en JWT.
-**Sidebar**: Dashboard, Rutinas, Nueva Rutina.
-
----
-
-### 1. Coach Dashboard (`/coach/dashboard`)
-**Ruta**: `'coach/dashboard'`
-**Componente**: `CoachDashboardComponent`
-
-**Propósito**: Panel principal del coach con lista de sus miembros y scores de riesgo.
-
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/users?coach_id={userId}` | Miembros asignados a este coach |
-| `GET /api/v1/risk/all` | Todos los risk scores del gym |
-
-**Contenido**:
-- Cards de resumen:
-  - Miembros activos (filtrados por status === 'active')
-  - Miembros en riesgo alto (risk category === 'high')
-- Lista de miembros, cada uno con:
-  - Nombre, email, nivel (beginner/intermediate/advanced), status badge
-  - Score de riesgo con badge de color (high=rojo, medium=amarillo, low=verde)
-  - Botones de acción por miembro
-
-**Acciones por miembro**:
-| Elemento | API | Resultado |
-|----------|-----|-----------|
-| Click en card | Navegación | `/coach/members/{memberId}` |
-| "Calcular riesgo" | `POST /api/v1/risk/calculate/{memberId}` | Actualiza risk score, muestra spinner por miembro |
-| "Enviar mensaje" | `POST /api/v1/jobs/messaging/{memberId}` | Dispara mensaje IA, muestra spinner por miembro |
-
-**Navegación desde aquí**:
-- Click en miembro → `/coach/members/:id`
-- Sidebar → Rutinas, Nueva Rutina
-
----
-
-### 2. Coach Member Detail (`/coach/members/:id`)
-**Ruta**: `'coach/members/:id'`
-**Componente**: `MemberDetailComponent`
-
-**Propósito**: Vista detallada de un miembro específico.
-
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/users/{userId}` | Datos del miembro |
-| `GET /api/v1/risk/{userId}` | Risk score del miembro |
-| `GET /api/v1/attendance/user/{userId}/last` | Última asistencia |
-| `GET /api/v1/feedback/user/{userId}` | Feedbacks del miembro (hasta 10) |
-
-**Contenido**:
-- Header con nombre, email, nivel
-- Badge de status (active/inactive/churned) con color
-- Stats cards: risk score (con color), última asistencia, cantidad de feedbacks
-- Lista de feedbacks recientes con effort/energy (X/5 c/u)
-
-**Acciones**:
-| Elemento | Acción |
-|----------|--------|
-| Stats cards | Read-only |
-| Lista feedbacks | Read-only |
-
-**Problemas actuales**:
-- No hay acciones sobre el miembro (editar perfil, cambiar status, etc.)
-
----
-
-### 3. Coach Routines List (`/coach/routines`)
-**Ruta**: `'coach/routines'`
-**Componente**: `RoutinesComponent`
-
-**Propósito**: Listar todas las rutinas del gimnasio.
-
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/routines` | Todas las rutinas del gym |
-
-**Contenido**:
-- Lista de rutinas con: nombre, cantidad de ejercicios, fecha de creación
-- Estado vacío con botón para crear rutina
-
-**Acciones**:
-| Elemento | Acción |
-|----------|--------|
-| "+ Nueva rutina" | Navegación a `/coach/routines/create` |
-
----
-
-### 4. Coach Routine Create (`/coach/routines/create`)
-**Ruta**: `'coach/routines/create'`
-**Componente**: `RoutineCreateComponent`
-
-**Propósito**: Crear una nueva rutina con ejercicios.
+**API calls**: `POST /api/v1/auth/register` → `AuthResponse`
 
 **Formulario**:
-- Nombre de la rutina (texto, requerido)
-- User ID (UUID opcional — a quién asignar la rutina)
-- Lista dinámica de ejercicios:
-  - Nombre (texto)
-  - Sets (number, min 1)
-  - Reps (number, min 1)
-  - Botón "X" para eliminar ejercicio
+| Campo | Type | autocomplete | Problema |
+|---|---|---|---|
+| Nombre | `text` | ❌ falta | ✅ |
+| Email | `email` | ❌ falta | ✅ |
+| Password | `password` | ❌ falta | Sin indicador de fortaleza |
 
 **Acciones**:
-| Elemento | API | Resultado |
-|----------|-----|-----------|
-| "+ Agregar ejercicio" | — | Agrega fila vacía a la lista |
-| "X" en ejercicio | — | Elimina ejercicio de la lista |
-| Submit | `POST /api/v1/routines` + `POST /api/v1/exercises/bulk` | Crea rutina + ejercicios, redirige a `/coach/routines` |
+| Elemento | Resultado |
+|---|---|
+| Submit | Envía `gym_id: ''` (vacío), muestra success, redirige a `/login` tras 1.5s |
+| Link "Ingresá" | Navega a `/login` |
 
-**Problemas actuales**:
-- Pide gym_id manualmente en el formulario → debería venir del tenant context
-- Los ejercicios se crean sin gym_id en el backend (ya fixeado en backend, pero el frontend no lo envía)
-- No hay selector de usuario (hay que escribir UUID manual)
+**Flujo de error**: Status 400 → "El ID de gym es obligatorio. Usá el seed para crear uno."
 
----
-
-## Interfaces Member (`/member/*`)
-
-**Requisito**: Rol `member` en JWT.
-**Sidebar**: Dashboard, Mi Rutina, Feedback, Progreso, Notificaciones.
+**Problemas críticos**:
+- `gym_id` se envía vacío **SIEMPRE** → el registro siempre falla a menos que el backend lo acepte vacío (no debería)
+- Sin validación de fortaleza de contraseña
+- Sin `autocomplete` en ningún input
+- Sin spinner de carga en el botón submit
+- Error message expone detalle interno ("El ID de gym es obligatorio")
 
 ---
 
-### 1. Member Dashboard (`/member/dashboard`)
-**Ruta**: `'member/dashboard'`
-**Componente**: `MemberDashboardComponent`
+## Admin (`/admin/*`)
 
-**Propósito**: Panel principal del miembro con resumen de actividad y riesgo.
+### Admin Dashboard (`/admin/dashboard`)
+**Requiere**: Rol `admin`
+**Componente**: `DashboardComponent` (standalone)
 
-**Datos obtenidos**:
+**API call**: `GET /api/v1/stats`
+
+**Retorna**:
+```json
+{
+  "totalUsers": 5, "activeUsers": 3, "churnedUsers": 1, "inactiveUsers": 1,
+  "todayAttendance": 2, "totalMembers": 4, "totalCoaches": 1,
+  "usersAtHighRisk": 1, "usersAtMediumRisk": 2, "usersAtLowRisk": 2,
+  "notificationsSentToday": 3, "recentRisks": [{ "userId": "...", "userName": "...", "score": 0.85, "category": "high" }]
+}
+```
+
+**Secciones**:
+
+1. **Métricas principales** (grid-3): Total usuarios ⚠️ En riesgo alto 📨 Mensajes enviados hoy
+2. **Métricas secundarias** (grid-4): Activos, Churned, Asistencias hoy, Riesgo bajo
+3. **Desglose por estado** (card izquierda): Progress bars con % Activos / Inactivos / Churned
+4. **Resumen rápido** (card derecha): Miembros, Coaches, Riesgo medio, Riesgo bajo, Inactivos
+5. **Tabla de usuarios en riesgo** (card inferior): Nombre | Score (4 decimales) | Categoría (badge)
+
+**Acciones**: ❌ Ninguna (read-only dashboard).
+
+**Cómputos**: `statusBreakdown()` calcula porcentajes, `riskScoreColor()` mapea thresholds.
+
+**Problemas**:
+- Score con 4 decimales (`toFixed(4)`) es ruido visual → 2 decimales bastan
+- Sin paginación en `recentRisks` (si hay cientos de usuarios, explota)
+- La tabla de riesgos no es clickeable → no lleva al detalle del usuario
+- No hay acciones de admin (crear coach, crear usuario, etc.)
+- Sin cache/refetch de stats
+- Sin skeleton loader mientras carga
+
+---
+
+### Admin Coaches (`/admin/coaches`)
+**Requiere**: Rol `admin`
+**Componente**: `CoachesComponent` (standalone)
+
+**API call**: `GET /api/v1/coaches` → `Coach[]`
+
+**Contenido**:
+- Header con contador: "X coaches registrados"
+- Tabla: Nombre | Email | Gym (UUID truncado a 8 chars)
+- Estado vacío con mensaje
+
+**Acciones**: ❌ Ninguna. Read-only.
+
+**Problemas**:
+- ❌ **No se pueden crear, editar ni eliminar coaches** — es una tabla de solo lectura
+- Gym ID truncado sin tooltip (`title`) con el UUID completo
+- Sin métricas por coach (miembros asignados, etc.)
+- Sin paginación
+- Sin búsqueda/filtro por nombre
+
+---
+
+## Coach (`/coach/*`)
+
+### Coach Dashboard (`/coach/dashboard`)
+**Requiere**: Rol `coach`
+**Componente**: `CoachDashboardComponent` (standalone, imports: `RouterLink`)
+**Dependencias**: `AuthService` (para obtener `userId`)
+
+**API calls**:
 | API | Uso |
-|-----|-----|
-| `GET /api/v1/attendance/user/{userId}/count?days=7` | Asistencias en últimos 7 días |
-| `GET /api/v1/feedback/user/{userId}/averages?last=5` | Promedio effort/energy últimas 5 sesiones |
-| `GET /api/v1/risk/{userId}` | Risk score personal |
-| `GET /api/v1/attendance/user/{userId}/last` | Fecha de última asistencia |
+|---|---|
+| `GET /api/v1/users?coach_id={userId}` | Miembros asignados |
+| `GET /api/v1/risk/all` | Scores de riesgo del gym |
+| `POST /api/v1/risk/calculate/{memberId}` | Trigger cálculo de riesgo |
+| `POST /api/v1/jobs/messaging/{memberId}` | Trigger mensaje IA |
+
+**Secciones**:
+
+1. **Stats cards** (grid-3): Total miembros · Activos · Alto riesgo (conteos)
+2. **Lista de miembros** (member cards), cada una con:
+   - Avatar (primera letra) + nombre + email + nivel
+   - Badge de status (active/inactive/churned) con color
+   - Badge de riesgo (% con color según threshold)
+   - Botón "Calcular riesgo" (icono gráfico de barras) → `POST /api/v1/risk/calculate/{id}`
+   - Botón "Enviar mensaje" (icono de chat) → `POST /api/v1/jobs/messaging/{id}`
+   - Chevron → navegación a `/coach/members/{id}`
+
+**Acciones por miembro**:
+| Elemento | Tipo | Acción |
+|---|---|---|
+| Card completa | `<a routerLink>` | Navega a `/coach/members/{id}` |
+| Calcular riesgo | `<button>` icon | POST + refetch risks |
+| Enviar mensaje | `<button>` icon | POST (sin feedback de resultado) |
+
+**Estados**: `loadingCalc` (Set de IDs con spinner), `loadingMsg` (Set de IDs con spinner)
+
+**Cómputos**: `activeMembers()`, `highRiskCount()`, `memberRisk(member)` lookup.
+
+**Problemas**:
+- Sin `aria-label` en los icon buttons (violación accesibilidad)
+- `calculateRisk()` recrea toda la signal en vez de hacer update optimista
+- Sin confirmación antes de enviar mensaje
+- Sin paginación (si tiene >50 miembros)
+- Los botones tienen `(click)` con `preventDefault()` porque están dentro de un `<a>` — patrón incorrecto
+- Sin feedback visual de éxito/error en "Enviar mensaje"
+- Sin distinción visual entre miembros activos/inactivos/churned más allá del badge
+
+---
+
+### Coach Member Detail (`/coach/members/:id`)
+**Requiere**: Rol `coach`
+**Componente**: `MemberDetailComponent` (standalone)
+
+**API calls**:
+| API | Uso |
+|---|---|
+| `GET /api/v1/users/{userId}` | Datos del miembro |
+| `GET /api/v1/risk/{userId}` | Risk score |
+| `GET /api/v1/attendance/user/{userId}/last` | Última asistencia |
+| `GET /api/v1/feedback/user/{userId}` | Feedbacks |
+
+**Secciones**:
+1. **Profile header**: Avatar grande + nombre + email + nivel + badge status
+2. **Stats cards** (grid-3): Score de riesgo (color según threshold) · Última asistencia · Cantidad de feedbacks
+3. **Feedback reciente**: Lista con date · effort/5 · energy/5 (hasta 10)
+
+**Cómputos**: `lastDate()` formatea fecha, `riskColor()` según threshold.
+
+**Acciones**: ❌ Ninguna. Read-only.
+
+**Problemas**:
+- ❌ No hay acciones sobre el miembro (cambiar status, editar perfil, reasignar coach)
+- ❌ No se puede ver la rutina del miembro
+- ❌ No hay historial de riesgo (solo el último score)
+- La función `lastDate()` NO es un computed signal — es una función plana que se ejecuta en el template → no es reactiva
+- Sin paginación en feedbacks (si tiene +10, se pierden)
+- Sin skeleton loader
+
+---
+
+### Coach Routines List (`/coach/routines`)
+**Requiere**: Rol `coach`
+**Componente**: `RoutinesComponent` (standalone, imports: `RouterLink`)
+
+**API call**: `GET /api/v1/routines` → `Routine[]`
+
+**Contenido**:
+- Header: "Rutinas" + "X rutinas creadas" + botón "+ Nueva rutina"
+- Lista de cards: ícono 🏋️ + nombre + cantidad de ejercicios + fecha de creación
+- Estado vacío con botón "Crear rutina"
+
+**Acciones**:
+| Elemento | Resultado |
+|---|---|
+| "+ Nueva rutina" | Navega a `/coach/routines/create` |
+| "Crear rutina" (vacío) | Navega a `/coach/routines/create` |
+
+**Problemas**:
+- ❌ No se puede editar ni eliminar rutinas
+- ❌ No se puede ver a qué usuario está asignada cada rutina
+- Sin paginación
+- Sin filtro por usuario/nombre
+
+---
+
+### Coach Routine Create (`/coach/routines/create`)
+**Requiere**: Rol `coach`
+**Componente**: `RoutineCreateComponent` (standalone, imports: `FormsModule`)
+
+**API calls**:
+| API | Momento |
+|---|---|
+| `POST /api/v1/routines` | Primero: crea rutina |
+| `POST /api/v1/exercises/bulk` | Segundo: crea ejercicios |
+
+**Formulario**:
+
+| Campo | Control | Validación | Problema |
+|---|---|---|---|
+| Nombre de rutina | `text` | Required (custom) | ✅ |
+| ID del gym | `text` | Required (custom) | 🔴 **El coach no debería ver/pedir el UUID del gym** |
+| ID del usuario | `text` | Optional | 🔴 **No es UX: debería ser un selector** |
+| Ejercicios (lista dinámica) | Nombre, Sets, Reps | — | Sin validación de sets>0, reps>0 |
+
+**Acciones dinámicas**:
+| Elemento | Acción |
+|---|---|
+| "+ Agregar" | Agrega ejercicio vacío a la lista |
+| "✕" en ejercicio | Elimina ejercicio |
+| Submit | Crea rutina → crea ejercicios → redirige a `/coach/routines` |
+
+**Problemas críticos**:
+- **🔴 gym_id manual**: El coach tiene que escribir el UUID del gym. Debería venir del context del tenant automáticamente.
+- **🔴 user_id manual**: El coach tiene que saber el UUID del miembro. Debería haber un selector con búsqueda.
+- Sin validación de sets/reps > 0
+- Sin indicador de carga mientras se guarda
+- Si falla el POST de ejercicios, la rutina queda huérfana (no hay rollback)
+- Los input names usan índices (`name_${id}`) que son frágiles
+- Sin confirmación antes de navegar si hay cambios sin guardar
+
+---
+
+## Member (`/member/*`)
+
+### Member Dashboard (`/member/dashboard`)
+**Requiere**: Rol `member`
+**Componente**: `MemberDashboardComponent` (standalone, imports: `RouterLink`)
+**Dependencias**: `AuthService`
+
+**API calls** (5 paralelas):
+| API | Para qué |
+|---|---|
+| `GET /api/v1/attendance/user/{userId}/count?days=7` | Conteo semanal |
+| `GET /api/v1/feedback/user/{userId}/averages?last=5` | Promedios |
+| `GET /api/v1/risk/{userId}` | Risk score |
+| `GET /api/v1/attendance/user/{userId}/last` | Última asistencia |
 | `GET /api/v1/notifications/user/{userId}` | Notificaciones recientes |
 
-**Contenido**:
-- **Stats cards** (4):
-  | Card | Descripción |
-  |------|-------------|
-  | Asistencias (7d) | Número de visitas en la última semana |
-  | Score de Riesgo | Valor + color (verde/amarillo/rojo) |
-  | Esfuerzo Promedio | Promedio effort_level (últimas 5) |
-  | Notificaciones | Cantidad de notificaciones sin leer |
+**Secciones**:
 
-- **Risk progress bar**: Barra con gradiente verde→rojo según el score
-- **Última asistencia**: Fecha + etiqueta (Ej: "Hace 3 días")
-- **Notificaciones recientes** (hasta 3): mensaje, status badge, fecha
-- **Quick links** (4 cards):
-  - Mi Rutina → `/member/routine`
-  - Dar Feedback → `/member/feedback`
-  - Mi Progreso → `/member/progress`
-  - Notificaciones → `/member/notifications`
+1. **Stats cards** (grid-4): Asistencias (7d) · Score de riesgo · Esfuerzo promedio · Notificaciones
+2. **Estado de riesgo** (card izquierda): Progress bar (gradiente según score) + mensaje contextual
+3. **Última asistencia** (card derecha): Emoji 🏋️ + fecha formateada + "Hace X días"
+4. **Notificaciones recientes** (hasta 3): Icono status + mensaje truncado + fecha + badge
+5. **Quick links** (grid-2, 4 cards): Mi Rutina / Dar Feedback / Mi Progreso / Notificaciones
+
+**Cómputos** (11 computed signals): `avgEffort`, `avgEnergy`, `riskScore`, `riskFormatted`, `riskBarWidth`, `riskColor`, `riskBarBg`, `riskMessage`, `lastDateLabel`, `daysSinceLabel`, `userName`
 
 **Acciones**:
-| Elemento | Acción |
-|----------|--------|
-| Quick links | Navegación a rutas internas |
-| "Ver todas" (notificaciones) | Navegación a `/member/notifications` |
-| Stats cards | Read-only |
+| Elemento | Destino |
+|---|---|
+| "Ver todas" (notificaciones) | `/member/notifications` |
+| Quick link "Mi Rutina" | `/member/routine` |
+| Quick link "Dar Feedback" | `/member/feedback` |
+| Quick link "Mi Progreso" | `/member/progress` |
+| Quick link "Notificaciones" | `/member/notifications` |
+
+**Problemas**:
+- 5 llamadas HTTP paralelas al montar el componente → posible waterfall si alguna es lenta
+- `userName()` no es un signal computed que se re-calcule si auth.user cambia
+- Sin cache de datos entre navegaciones (vuelve a fetch al entrar)
+- Las notificaciones sin leer no tienen distinción visual
+- El riesgo solo muestra mensaje genérico, sin sugerencias accionables
 
 ---
 
-### 2. Member Routine (`/member/routine`)
-**Ruta**: `'member/routine'`
-**Componente**: `MemberRoutineComponent`
+### Member Routine (`/member/routine`)
+**Requiere**: Rol `member`
+**Componente**: `MemberRoutineComponent` (standalone)
 
-**Propósito**: Ver la rutina asignada y registrar sesión completada.
-
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/routines?user_id={userId}` | Rutinas asignadas al miembro |
-
-**Contenido**:
-- Nombre de la rutina + cantidad de ejercicios
-- Lista de ejercicios con checkboxes (visuales)
-- Botón "Completar sesión"
-
-**Acciones**:
-| Elemento | API | Resultado |
-|----------|-----|-----------|
-| Checkboxes ejercicios | — | Visual (solo UI) |
-| "Completar sesión" | `POST /api/v1/attendance` | Registra attendance con date=today, completed=true. Muestra card de éxito |
-
-**Problemas actuales**:
-- No hay feedback visual de carga mientras se guarda la asistencia (solo un `alert()` en error)
-- Los checkboxes no persisten entre visitas
-
----
-
-### 3. Member Feedback (`/member/feedback`)
-**Ruta**: `'member/feedback'`
-**Componente**: `MemberFeedbackComponent`
-
-**Propósito**: Registrar feedback post-entrenamiento.
+**API calls**:
+| API | Momento |
+|---|---|
+| `GET /api/v1/routines?user_id={userId}` | On init |
+| `POST /api/v1/attendance` | On "Completar sesión" |
 
 **Contenido**:
-- Selector de effort level (1-5) con botones de color (1-2 rojo, 3 amarillo, 4-5 verde)
-- Selector de energy level (1-5) con mismos colores
-- Botón submit
+- Card de éxito post-completado (🎉 "¡Sesión completada!")
+- Estado vacío si no hay rutina asignada
+- Lista de ejercicios con checkboxes visuales + número + nombre + `S × R` badge
+- Botón "Completar sesión" con estado `saving` (texto "Registrando...")
 
 **Acciones**:
 | Elemento | API | Resultado |
-|----------|-----|-----------|
-| Click effort/energy | — | Selecciona nivel visualmente |
-| "Enviar feedback" | `POST /api/v1/feedback` | Crea feedback, muestra "Feedback enviado", deshabilita botón |
+|---|---|---|
+| Checkbox | — | Solo visual, no persiste |
+| "Completar sesión" | `POST /api/v1/attendance` | Crea attendance + muestra success |
 
-**Estado post-envío**: Muestra mensaje de éxito y bloquea el envío duplicado.
+**Problemas**:
+- **🔴 Checkboxes no persisten** — solo UI, al recargar se pierden
+- **🔴 `alert()` en error** — rompe la UX, debería ser un mensaje inline
+- Sin validación de que no se registre asistencia dos veces el mismo día
+- Sin feedback de cuántas sesiones completó esta semana
+- Sin indicación visual de progreso (ej: "Completaste 3/5 ejercicios")
 
 ---
 
-### 4. Member Progress (`/member/progress`)
-**Ruta**: `'member/progress'`
-**Componente**: `MemberProgressComponent`
+### Member Feedback (`/member/feedback`)
+**Requiere**: Rol `member`
+**Componente**: `MemberFeedbackComponent` (standalone, imports: `FormsModule`)
 
-**Propósito**: Ver progreso histórico del miembro.
+**API call**: `POST /api/v1/feedback`
 
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/attendance/user/{userId}/count?days=7` | Asistencias semanales |
-| `GET /api/v1/feedback/user/{userId}/averages?last=5` | Promedios effort/energy |
-| `GET /api/v1/risk/{userId}` | Risk score |
+**Formulario**:
+| Campo | UI | Valores |
+|---|---|---|
+| Nivel de esfuerzo | 5 botones (1-5) con selección visual (indigo) | 1-2 rojo claro, 3 amarillo, 4-5 verde |
+| Nivel de energía | 5 botones (1-5) con selección visual (verde) | Misma escala |
+
+**Estados**: `effort` signal (default 3), `energy` signal (default 3), `sent` signal.
+
+**Acciones**:
+| Elemento | Resultado |
+|---|---|
+| Click en effort/energy | Selecciona valor, escala visual |
+| Submit | Envía feedback + `sent = true` (deshabilita botón) |
+
+**Problemas**:
+- Sin validación de que no se envíe feedback dos veces el mismo día
+- No hay nota opcional de texto
+- No hay confirmación de que se registró correctamente (solo cambia el botón a "Enviado")
+- Sin `autocomplete="off"` en los botones de selección
+
+---
+
+### Member Progress (`/member/progress`)
+**Requiere**: Rol `member`
+**Componente**: `MemberProgressComponent` (standalone)
+
+**API calls** (3 paralelas):
+| API | Para qué |
+|---|---|
+| `GET /api/v1/attendance/user/{userId}/count?days=7` | Conteo semanal |
+| `GET /api/v1/feedback/user/{userId}/averages?last=5` | Promedios |
+| `GET /api/v1/risk/{userId}` | Score |
 
 **Contenido**:
-- Asistencias (7d) - card numérica
-- Score de Riesgo con progress bar de color
-- Esfuerzo promedio (X/5)
-- Energía promedio (X/5)
+- Stats cards (grid-4, mismas que dashboard): Asistencias · Score de riesgo · Esfuerzo · Energía
+- Progress bar de riesgo (card inferior)
 
-**Acciones**: Read-only.
+**Cómputos**: `avgEffort`, `avgEnergy`, `riskScore`, `riskScoreFormatted`, `riskBarWidth`, `riskColor`, `riskBarBg`
 
-**Problemas actuales**:
-- Solo muestra últimos 7 días de attendance y últimas 5 sesiones de feedback
-- Sin gráficos históricos ni tendencias
+**Acciones**: ❌ Ninguna.
+
+**Problemas**:
+- **🔴 Misma info que el dashboard** — no hay valor agregado: sin gráficos, sin tendencias, sin historial
 - Sin historial de scores de riesgo (solo el último)
+- Sin histórico de asistencias (solo últimos 7 días)
+- Sin histórico de feedback (solo últimos 5 promedios)
+- Sin gráficos (barras, líneas de tendencia)
 
 ---
 
-### 5. Member Notifications (`/member/notifications`)
-**Ruta**: `'member/notifications'`
-**Componente**: `MemberNotificationsComponent`
+### Member Notifications (`/member/notifications`)
+**Requiere**: Rol `member`
+**Componente**: `MemberNotificationsComponent` (standalone)
 
-**Propósito**: Ver todas las notificaciones recibidas.
-
-**Datos obtenidos**:
-| API | Uso |
-|-----|-----|
-| `GET /api/v1/notifications/user/{userId}` | Notificaciones del miembro |
+**API call**: `GET /api/v1/notifications/user/{userId}` → `Notification[]`
 
 **Contenido**:
-- Lista completa de notificaciones, cada una con:
-  - Icono de status (pending/sent/failed)
-  - Mensaje de texto
-  - Fecha de creación (formateada)
-  - Badge de trigger (high_risk, milestone, manual)
-  - Badge de status (pending/sent/failed)
+- Lista de notificaciones tipo timeline con:
+  - Status dot (pendiente/enviado/fallido con emoji ⏳✅❌)
+  - Mensaje
+  - Fecha formateada
+  - Trigger badge (high_risk / milestone / manual)
+  - Status badge (pending / sent / failed)
+- Estado vacío con mensaje
 
-**Acciones**: Read-only.
+**Acciones**: ❌ Ninguna.
+
+**Problemas**:
+- Sin marcar como leída
+- Sin filtro por estado (pending/sent/failed)
+- Sin paginación
+- Sin acción de reintentar para notificaciones failed
 
 ---
 
@@ -453,27 +606,26 @@ Footer del sidebar: "AI Gym Retention v1.0"
 
 ```
                          ┌──────────┐
-                         │  Landing  │
-                         │    /      │
+                         │  /       │
+                         │ Landing  │
                          └────┬─────┘
                               │
                     ┌─────────┴──────────┐
                     ▼                    ▼
               ┌──────────┐        ┌──────────┐
-              │  Login   │        │ Register │
-              │  /login  │        │ /register│
+              │ /login   │        │ /register│
               └────┬─────┘        └──────────┘
                    │
             ┌──────┴──────┬──────────────┐
             ▼             ▼              ▼
      ┌────────────┐ ┌──────────┐ ┌──────────────┐
-     │ /admin/    │ │ /coach/  │ │  /member/    │
+     │ admin/     │ │ coach/   │ │  member/     │
      │  dashboard │ │  dashboard│ │   dashboard  │
-     │  coaches   │ │  members/│ │   routine    │
-     │            │ │   :id    │ │   feedback   │
-     │            │ │  routines│ │   progress   │
-     │            │ │  routines│ │  notifications│
-     │            │ │   /create│ │              │
+     │  coaches   │ │  members/ │ │   routine    │
+     │            │ │   :id     │ │   feedback   │
+     │            │ │  routines │ │   progress   │
+     │            │ │  routines/│ │  notifications│
+     │            │ │   create  │ │              │
      └────────────┘ └──────────┘ └──────────────┘
 ```
 
@@ -482,38 +634,89 @@ Footer del sidebar: "AI Gym Retention v1.0"
 ## Resumen de acciones por rol
 
 | Acción | Admin | Coach | Member |
-|--------|-------|-------|--------|
-| Ver dashboard con métricas | ✅ Global | ✅ Sus miembros | ✅ Personal |
-| Gestionar coaches | ❌ (solo read) | — | — |
-| Ver detalle de miembro | — | ✅ | — |
+|---|---|---|---|
+| Ver dashboard | ✅ Global | ✅ Sus miembros | ✅ Personal |
+| CRUD Coaches | ❌ (solo read) | — | — |
+| CRUD Miembros | ❌ | ❌ | — |
+| Ver detalle miembro | — | ✅ | — |
 | Calcular riesgo | — | ✅ (por miembro) | ❌ |
 | Enviar mensaje IA | — | ✅ (por miembro) | — |
-| CRUD rutinas | — | ✅ | ❌ (solo view) |
+| CRUD Rutinas | — | ✅ (solo create + read) | ❌ (solo read) |
 | Registrar asistencia | — | — | ✅ |
 | Dar feedback | — | — | ✅ |
 | Ver progreso | — | — | ✅ |
 | Ver notificaciones | — | — | ✅ |
-| Crear/editar/eliminar usuarios | ❌ (solo seed) | ❌ | ❌ |
 
 ---
 
-## Problemas de usabilidad detectados
+## Problemas por prioridad para refactor
 
-### Críticos
-1. **Crear rutina pide gym_id manual** — el coach no debería ver ni saber el UUID del gym
-2. **Member routine solo muestra checkboxes visuales** — no marcan persistence ni envían datos
-3. **Sin feedback de carga en "Completar sesión"** — solo `alert()` en error
-4. **Admin no puede crear/editar coaches** — solo lista, sin gestión
-5. **Sin paginación en listas** — coaches, routines, notifications cargan todo
+### 🔴 Críticos (rotura funcional o UX blocking)
 
-### Medios
-6. **Register no envía gym_id válido** — el usuario nuevo no sabe qué gym_id poner
-7. **Coach member detail sin acciones** — no puede editar perfil ni cambiar status
-8. **Member progress sin tendencias** — solo valores puntuales, sin gráficos
-9. **Login sin persistencia de sesión** — al recargar se pierde (solo localStorage, no verifica token)
-10. **Sin confirmación en acciones destructivas** — no hay delete en frontend, pero si se agregan después
+| # | Problema | Componente | Impacto |
+|---|---|---|---|
+| 1 | Register envía `gym_id: ''` → siempre falla | `RegisterComponent` | No se pueden registrar usuarios nuevos |
+| 2 | Crear rutina pide `gym_id` manual al coach | `RoutineCreateComponent` | Coach no sabe qué UUID poner |
+| 3 | Member routine checkboxes no persisten | `MemberRoutineComponent` | Usuario pierde progreso visual |
+| 4 | `alert()` en error de completar sesión | `MemberRoutineComponent` | UX bloqueante, no hay mensaje inline |
+| 5 | Admin no puede crear/editar coaches | `CoachesComponent` | Funcionalidad incompleta |
+| 6 | MemberProgress duplica MemberDashboard | `MemberProgressComponent` | Sin valor agregado |
+| 7 | Coach routine list sin editar/eliminar | `RoutinesComponent` | Funcionalidad incompleta |
 
-### Bajos
-11. **Dashboard admin sin navegación a detalle** — la tabla de riesgos no es clickeable
-12. **Coach routine list sin editar/eliminar** — solo crear nuevas
-13. **Notificaciones sin marcar como leídas** — todas aparecen igual
+### 🟡 Altos (UX degradada)
+
+| # | Problema | Componente | Impacto |
+|---|---|---|---|
+| 8 | Icon buttons sin `aria-label` | `CoachDashboardComponent` | Inaccesible para lectores de pantalla |
+| 9 | Sin autocomplete en login | `LoginComponent` | No funciona con password managers |
+| 10 | Admin dashboard sin acciones | `DashboardComponent` | Dashboard no accionable |
+| 11 | Sin paginación en listas | Varios | Degradación con datos reales |
+| 12 | `lastDate()` no es computed signal | `MemberDetailComponent` | No se actualiza reactivamente |
+| 13 | Coach member detail sin acciones | `MemberDetailComponent` | Solo lectura, no permite ayudar al miembro |
+| 14 | Sin skeleton loading en ningún componente | Varios | Pantalla en blanco mientras carga |
+| 15 | Sin `prefers-reduced-motion` | `styles.css` | Puede causar mareos en usuarios sensibles |
+
+### 🟢 Medios (mejorable)
+
+| # | Problema | Componente | Impacto |
+|---|---|---|---|
+| 16 | Sin dark mode | `styles.css` | Sin soporte de tema oscuro |
+| 17 | Score con 4 decimales | `DashboardComponent` | Ruido visual |
+| 18 | 5 llamadas HTTP paralelas en member dashboard | `MemberDashboardComponent` | Waterfall de carga |
+| 19 | Sin filtros en listas | Varios | Dificulta encontrar datos |
+| 20 | Tipografía genérica (Inter) | `styles.css` | Sin identidad visual |
+| 21 | Estado vacío sin call-to-action útil | Varios | Usuario no sabe qué hacer |
+| 22 | Notificaciones sin marcar como leídas | `MemberNotificationsComponent` | No hay gestión de estado |
+| 23 | Coach routine create sin selector de usuario | `RoutineCreateComponent` | Mala UX, requiere saber UUID |
+
+---
+
+## Recomendaciones de diseño (Frontend Design Skill)
+
+Basado en la skill `frontend-design`, el sistema actual tiene un diseño correcto pero genérico. Para darle identidad:
+
+### Tipografía
+- **Cambiar Inter** por una dupla con personalidad:
+  - Display: `DM Sans`, `Sora` o `Plus Jakarta Sans` para títulos
+  - Body: `Inter` está bien, pero se puede cambiar a `Outfit` o `Manrope`
+- Aplicar `font-variant-numeric: tabular-nums` en todas las cards con números
+
+### Color
+- El indigo `#4f46e5` es funcional pero común. Considerar:
+  - Mantener indigo como primary pero agregar un accent más audaz (ej: `#f59e0b` o `#ec4899`)
+  - Usar gradientes en backgrounds de cards de riesgo (verde→amarillo→rojo)
+
+### Motion
+- Agregar staggered reveals en listas con `animation-delay` incremental
+- Micro-interactions en hover de cards (scale sutil + shadow)
+- Transiciones de página con `View Transitions API`
+
+### Layout
+- Sidebar colapsable en mobile
+- Dashboard adaptativo: 1 col en mobile, 2-4 en desktop
+- Grid asimétrico en dashboard admin (card de riesgo más grande que las otras)
+
+### Backgrounds
+- Agregar noise texture sutil al fondo
+- Cards de estado con gradient meshes en lugar de colores sólidos
+- Avatar backgrounds con gradient basado en el nombre (hash→color)

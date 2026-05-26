@@ -21,11 +21,11 @@ import { AuthResponse } from '../../../core/types';
           <form (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;gap:20px">
             <div class="input-group">
               <label class="input-label">Email</label>
-              <input [(ngModel)]="email" name="email" type="email" placeholder="tu@email.com" class="input" required>
+              <input [(ngModel)]="email" name="email" type="email" placeholder="tu@email.com" class="input" autocomplete="email" required>
             </div>
             <div class="input-group">
               <label class="input-label">Contraseña</label>
-              <input [(ngModel)]="password" name="password" type="password" placeholder="••••••••" class="input" required>
+              <input [(ngModel)]="password" name="password" type="password" placeholder="••••••••" class="input" autocomplete="current-password" required>
             </div>
 
             @if (error()) {

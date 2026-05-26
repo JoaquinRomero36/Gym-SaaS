@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, inject, signal, computed } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth.service';
 
@@ -25,6 +25,11 @@ import { AuthService } from '../../../core/auth.service';
         </div>
         <br>
       }
+      @if (error()) {
+        <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">
+          {{ error() }}
+        </div>
+      }
 
       @if (routines().length === 0) {
         <div class="empty-state">
@@ -46,9 +51,10 @@ import { AuthService } from '../../../core/auth.service';
 
           <div style="display:flex;flex-direction:column;gap:8px">
             @for (e of r.exercises; track e.id; let i = $index) {
-              <label class="exercise-item">
+              <label class="exercise-item" [class.done]="checkedExercises()[e.id]">
                 <div class="exercise-num">{{ i + 1 }}</div>
-                <input type="checkbox" style="width:16px;height:16px;accent-color:var(--color-primary);flex-shrink:0">
+                <input type="checkbox" style="width:16px;height:16px;accent-color:var(--color-primary);flex-shrink:0"
+                  [checked]="checkedExercises()[e.id]" (change)="toggleExercise(e.id)">
                 <span style="flex:1;font-weight:500;font-size:14px">{{ e.name }}</span>
                 <span class="exercise-detail">{{ e.sets }} × {{ e.reps }}</span>
               </label>
@@ -73,12 +79,23 @@ export class MemberRoutineComponent {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   userId = this.auth.user()?.id;
+  key = `member_routine_${this.userId}`;
   routines = toSignal(this.http.get<any[]>(`/api/v1/routines?user_id=${this.userId}`), { initialValue: [] });
   completed = signal(false);
   saving = signal(false);
+  error = signal('');
+
+  private saved = JSON.parse(localStorage.getItem(this.key) ?? '{}') as Record<string, boolean>;
+  checkedExercises = signal<Record<string, boolean>>(this.saved);
+
+  toggleExercise(id: string) {
+    this.checkedExercises.update(m => ({ ...m, [id]: !m[id] }));
+    localStorage.setItem(this.key, JSON.stringify(this.checkedExercises()));
+  }
 
   completeSession() {
     this.saving.set(true);
+    this.error.set('');
     const today = new Date().toISOString().split('T')[0];
     this.http.post('/api/v1/attendance', {
       user_id: this.userId,
@@ -89,9 +106,9 @@ export class MemberRoutineComponent {
         this.completed.set(true);
         this.saving.set(false);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.saving.set(false);
-        alert('Error al registrar la asistencia. Inténtalo de nuevo.');
+        this.error.set(err.error?.message || 'Error al registrar la asistencia. Intentalo de nuevo.');
       },
     });
   }

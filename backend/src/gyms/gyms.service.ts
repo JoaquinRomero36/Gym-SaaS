@@ -15,6 +15,10 @@ export class GymsService {
     return this.repo.find({ where: { id: this.tenantService.gymId } });
   }
 
+  async findAllPublic(): Promise<{ id: string; name: string }[]> {
+    return this.repo.find({ select: ['id', 'name'] });
+  }
+
   async findOne(id: string): Promise<Gym> {
     const g = await this.repo.findOne({ where: { id } });
     if (!g) throw new NotFoundException(`Gym ${id} not found`);

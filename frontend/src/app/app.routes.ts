@@ -22,6 +22,7 @@ export const routes: Routes = [
     { path: 'members/:id', loadComponent: () => import('./features/coach/member-detail/member-detail.component').then(c => c.MemberDetailComponent) },
     { path: 'routines', loadComponent: () => import('./features/coach/routines/routines.component').then(c => c.RoutinesComponent) },
     { path: 'routines/create', loadComponent: () => import('./features/coach/routine-create/routine-create.component').then(c => c.RoutineCreateComponent) },
+    { path: 'routines/edit/:id', loadComponent: () => import('./features/coach/routine-create/routine-create.component').then(c => c.RoutineCreateComponent) },
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   ]},
 

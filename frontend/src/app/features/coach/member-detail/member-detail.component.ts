@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -15,10 +15,24 @@ import { toSignal } from '@angular/core/rxjs-interop';
             <h1 style="font-size:20px;font-weight:700;margin:0 0 4px">{{ m.name }}</h1>
             <p style="font-size:14px;color:var(--color-text-secondary);margin:0">{{ m.email }} · {{ m.level }}</p>
           </div>
-          <span class="badge" [class.badge-success]="m.status === 'active'" [class.badge-danger]="m.status !== 'active'">
-            {{ m.status }}
-          </span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge" [class.badge-success]="m.status === 'active'" [class.badge-danger]="m.status !== 'active'">
+              {{ m.status }}
+            </span>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px" (click)="calcRisk()" [disabled]="loadingRisk()" [attr.aria-label]="'Calcular riesgo de ' + m.name">
+              {{ loadingRisk() ? '...' : '🔄' }} Riesgo
+            </button>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:13px" (click)="sendMsg()" [disabled]="loadingMsg()" [attr.aria-label]="'Enviar alerta a ' + m.name">
+              {{ loadingMsg() ? '...' : '📨' }} Alertar
+            </button>
+          </div>
         </div>
+        @if (actionMsg()) {
+          <div style="background:var(--color-success-bg, #ecfdf5);color:var(--color-success, #059669);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ actionMsg() }}</div>
+        }
+        @if (actionError()) {
+          <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ actionError() }}</div>
+        }
 
         <div class="grid-3" style="margin-bottom:24px">
           <div class="stat-card">
@@ -77,16 +91,59 @@ export class MemberDetailComponent {
   lastAttendance = toSignal(this.http.get<any>(`/api/v1/attendance/user/${this.userId}/last`));
   feedbacks = toSignal(this.http.get<any[]>(`/api/v1/feedback/user/${this.userId}`), { initialValue: [] });
 
-  lastDate = () => {
+  loadingRisk = signal(false);
+  loadingMsg = signal(false);
+  actionMsg = signal('');
+  actionError = signal('');
+
+  lastDate = computed(() => {
     const d = this.lastAttendance()?.date;
     if (!d) return '-';
     const date = new Date(d);
     return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
-  };
+  });
 
-  riskColor = () => {
+  riskColor = computed(() => {
     const s = this.risk()?.score;
     if (!s) return '#94a3b8';
     return s >= 0.7 ? '#dc2626' : s >= 0.4 ? '#d97706' : '#059669';
-  };
+  });
+
+  calcRisk() {
+    this.loadingRisk.set(true);
+    this.actionMsg.set('');
+    this.actionError.set('');
+    this.http.post(`/api/v1/risk/calculate/${this.userId}`, {}).subscribe({
+      next: () => {
+        this.loadingRisk.set(false);
+        this.actionMsg.set('Riesgo recalculado correctamente.');
+        setTimeout(() => this.actionMsg.set(''), 4000);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loadingRisk.set(false);
+        this.actionError.set(err.error?.message || 'Error al calcular riesgo');
+      },
+    });
+  }
+
+  sendMsg() {
+    this.loadingMsg.set(true);
+    this.actionMsg.set('');
+    this.actionError.set('');
+    this.http.post('/api/v1/notifications', {
+      user_id: this.userId,
+      type: 'alert',
+      message: 'Tu coach te recomienda ponerte al día con tus entrenamientos. ¡Te esperamos!',
+    }).subscribe({
+      next: () => {
+        this.loadingMsg.set(false);
+        this.actionMsg.set('Alerta enviada al miembro.');
+        setTimeout(() => this.actionMsg.set(''), 4000);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loadingMsg.set(false);
+        this.actionError.set(err.error?.message || 'Error al enviar alerta');
+      },
+    });
+  }
 }

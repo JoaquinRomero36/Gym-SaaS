@@ -39,6 +39,10 @@ export class NotificationsService {
     });
   }
 
+  async markAsRead(id: string): Promise<void> {
+    await this.repo.update(id, { status: 'read' as any });
+  }
+
   async markAsSent(id: string): Promise<void> {
     await this.repo.update(id, { status: 'sent' as any, sentAt: new Date() });
   }

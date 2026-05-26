@@ -1,7 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../../core/auth.service';
 
 let _id = 0;
 function newId() { return ++_id; }
@@ -13,25 +15,24 @@ function newId() { return ++_id; }
   template: `
     <div class="animate-fade" style="max-width:640px">
       <div class="page-header">
-        <h1 class="page-title">Crear Rutina</h1>
-        <p class="page-subtitle">Armá una rutina con ejercicios para asignar a un miembro</p>
+        <h1 class="page-title">{{ editMode ? 'Editar Rutina' : 'Crear Rutina' }}</h1>
+        <p class="page-subtitle">{{ editMode ? 'Modificá los ejercicios de la rutina' : 'Armá una rutina con ejercicios para asignar a un miembro' }}</p>
       </div>
 
       <form (ngSubmit)="onSubmit()" class="card">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-          <div class="input-group">
-            <label class="input-label">Nombre de la rutina</label>
-            <input [(ngModel)]="name" name="name" placeholder="Ej: Pecho y tríceps" class="input" required>
-          </div>
-          <div class="input-group">
-            <label class="input-label">ID del gym</label>
-            <input [(ngModel)]="gymId" name="gymId" placeholder="UUID del gym" class="input" required>
-          </div>
+        <div class="input-group" style="margin-bottom:20px">
+          <label class="input-label">Nombre de la rutina</label>
+          <input [(ngModel)]="name" name="name" placeholder="Ej: Pecho y tríceps" class="input" required>
         </div>
 
         <div class="input-group" style="margin-bottom:20px">
-          <label class="input-label">ID del usuario (opcional)</label>
-          <input [(ngModel)]="userId" name="userId" placeholder="UUID del miembro" class="input">
+          <label class="input-label">Asignar a miembro (opcional)</label>
+          <select [(ngModel)]="userId" name="userId" class="input">
+            <option value="">Sin asignar</option>
+            @for (m of members(); track m.id) {
+              <option [value]="m.id">{{ m.name }} ({{ m.email }})</option>
+            }
+          </select>
         </div>
 
         <div style="border-top:1px solid var(--color-border-light);padding-top:16px;margin-bottom:16px">
@@ -57,7 +58,7 @@ function newId() { return ++_id; }
           <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ error() }}</div>
         }
 
-        <button type="submit" class="btn btn-primary" style="width:100%;height:44px">💾 Guardar rutina</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;height:44px">{{ editMode ? 'Actualizar rutina' : 'Guardar rutina' }}</button>
       </form>
     </div>
   `,
@@ -65,11 +66,31 @@ function newId() { return ++_id; }
 export class RoutineCreateComponent {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private auth = inject(AuthService);
+  routineId: string | null = null;
+  editMode = false;
   name = '';
   userId = '';
-  gymId = '';
+  gymId = this.auth.user()?.gymId ?? '';
+  members = toSignal(this.http.get<any[]>(`/api/v1/users`), { initialValue: [] });
   exercises = signal([{ _id: newId(), name: '', sets: 3, reps: 10 }]);
   error = signal('');
+
+  constructor() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.routineId = id;
+      this.editMode = true;
+      this.http.get<any>(`/api/v1/routines/${id}`).subscribe(r => {
+        this.name = r.name;
+        this.userId = r.user_id ?? '';
+        this.exercises.set((r.exercises ?? []).map((e: any, i: number) => ({
+          _id: newId(), id: e.id, name: e.name, sets: e.sets, reps: e.reps, order: i,
+        })));
+      });
+    }
+  }
 
   addExercise() {
     this.exercises.update(e => [...e, { _id: newId(), name: '', sets: 3, reps: 10 }]);
@@ -81,17 +102,23 @@ export class RoutineCreateComponent {
 
   onSubmit() {
     this.error.set('');
-    if (!this.name || !this.gymId) { this.error.set('Completá el nombre y el ID del gym'); return; }
+    if (!this.name) { this.error.set('Completá el nombre de la rutina'); return; }
 
-    this.http.post('/api/v1/routines', {
+    const body = {
       name: this.name,
       user_id: this.userId || null,
       gym_id: this.gymId,
-      coach_id: null,
-    }).subscribe({
+    };
+
+    const request$ = this.editMode && this.routineId
+      ? this.http.patch(`/api/v1/routines/${this.routineId}`, body)
+      : this.http.post('/api/v1/routines', body);
+
+    request$.subscribe({
       next: (routine: any) => {
+        const id = routine.id ?? this.routineId;
         const bulk = this.exercises().filter(e => e.name).map((e, i) => ({
-          routine_id: routine.id, name: e.name, sets: Number(e.sets), reps: Number(e.reps), order: i,
+          routine_id: id, name: e.name, sets: Number(e.sets), reps: Number(e.reps), order: i,
         }));
         if (bulk.length) {
           this.http.post('/api/v1/exercises/bulk', bulk).subscribe(() =>
@@ -101,7 +128,7 @@ export class RoutineCreateComponent {
           this.router.navigate(['/coach/routines']);
         }
       },
-      error: () => this.error.set('Error al crear rutina'),
+      error: () => this.error.set(this.editMode ? 'Error al actualizar rutina' : 'Error al crear rutina'),
     });
   }
 }

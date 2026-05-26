@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 
 @Component({
   selector: 'app-routines',
@@ -29,14 +29,18 @@ import { RouterLink } from '@angular/router';
       <div style="display:flex;flex-direction:column;gap:8px">
         @for (r of routines(); track r.id) {
           <div class="card-hover" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
-            <div style="display:flex;align-items:center;gap:16px">
+            <div style="display:flex;align-items:center;gap:16px;flex:1;cursor:pointer" (click)="editRoutine(r.id)">
               <div style="width:40px;height:40px;border-radius:var(--radius-lg);background:#eef2ff;color:#4f46e5;display:flex;align-items:center;justify-content:center;font-size:18px">🏋️</div>
               <div>
                 <div style="font-weight:600;font-size:14px">{{ r.name }}</div>
                 <div style="font-size:13px;color:var(--color-text-secondary)">{{ r.exercises?.length ?? 0 }} ejercicios</div>
               </div>
             </div>
-            <span style="font-size:12px;color:var(--color-text-muted)">{{ formatDate(r.createdAt) }}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--color-text-muted)">{{ formatDate(r.createdAt) }}</span>
+              <button class="btn-icon" title="Editar" (click)="editRoutine(r.id); $event.stopPropagation()" style="padding:6px 10px;font-size:14px">✏️</button>
+              <button class="btn-icon" title="Eliminar" (click)="deleteRoutine(r.id, r.name); $event.stopPropagation()" style="padding:6px 10px;font-size:14px">🗑️</button>
+            </div>
           </div>
         }
       </div>
@@ -45,10 +49,24 @@ import { RouterLink } from '@angular/router';
 })
 export class RoutinesComponent {
   private http = inject(HttpClient);
+  private router = inject(Router);
   routines = toSignal(this.http.get<any[]>('/api/v1/routines'), { initialValue: [] });
 
   formatDate(d: string): string {
     if (!d) return '';
     return new Date(d).toLocaleDateString('es-AR');
+  }
+
+  editRoutine(id: string) {
+    this.router.navigate(['/coach/routines/edit', id]);
+  }
+
+  deleteRoutine(id: string, name: string) {
+    if (!confirm(`¿Eliminar la rutina "${name}"?`)) return;
+    this.http.delete(`/api/v1/routines/${id}`).subscribe({
+      next: () => this.router.navigateByUrl('/coach/routines', { skipLocationChange: true }).then(() =>
+        window.location.reload()
+      ),
+    });
   }
 }

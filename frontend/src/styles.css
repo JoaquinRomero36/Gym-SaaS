@@ -45,7 +45,7 @@
   --radius-xl: 16px;
 
   /* Font */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* ═══════════════════════════════════════════
@@ -338,6 +338,14 @@ tbody tr:hover {
 .animate-fade  { animation: fadeIn 0.3s ease-out; }
 .animate-slide { animation: slideIn 0.3s ease-out; }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .spinner {
   width: 20px;
   height: 20px;
@@ -438,7 +446,11 @@ tbody tr:hover {
 }
 
 .notif-item:hover {
-  box-shadow: var(--shadow-md);
+  background: #f8fafc;
+}
+
+.notif-read {
+  opacity: 0.7;
 }
 
 .notif-dot {
@@ -594,6 +606,13 @@ tbody tr:hover {
   border-color: var(--color-border);
 }
 
+.exercise-item.done {
+  opacity: 0.6;
+  background: #f0fdf4;
+  border-color: #86efac;
+  text-decoration: line-through;
+}
+
 .exercise-num {
   width: 32px;
   height: 32px;
@@ -699,4 +718,47 @@ tbody tr:hover {
   font-size: 14px;
   color: var(--color-text-secondary);
   line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════
+   Modal
+   ═══════════════════════════════════════════ */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  animation: modalIn 0.15s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
 }
