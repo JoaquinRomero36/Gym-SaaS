@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth.service';
@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/auth.service';
 @Component({
   selector: 'app-member-progress',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-fade" style="max-width:820px">
       <div class="page-header">
@@ -13,38 +14,38 @@ import { AuthService } from '../../../core/auth.service';
         <p class="page-subtitle">Historial de actividad, feedback y evolución</p>
       </div>
 
-      <div class="grid-4" style="margin-bottom:24px">
+      <div class="grid-4" class="mb-24">
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eff6ff;color:#2563eb">📅</div>
+          <div class="stat-icon stat-icon-info">📅</div>
           <div>
-            <div class="stat-value" style="color:#2563eb">{{ attendanceCount()?.count ?? 0 }}</div>
+            <div class="stat-value" style="color:var(--color-info)">{{ attendanceCount()?.count ?? 0 }}</div>
             <div class="stat-label">Asistencias (7d)</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eef2ff;color:#4f46e5">📊</div>
+          <div class="stat-icon stat-icon-primary">📊</div>
           <div>
             <div class="stat-value" [style.color]="riskColor()">{{ riskScoreFormatted() }}</div>
             <div class="stat-label">Score de riesgo</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#ecfdf5;color:#059669">⭐</div>
+          <div class="stat-icon stat-icon-success">⭐</div>
           <div>
-            <div class="stat-value" style="color:#059669">{{ avgEffort() }}</div>
+            <div class="stat-value" style="color:var(--color-success)">{{ avgEffort() }}</div>
             <div class="stat-label">Esfuerzo promedio</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#fffbeb;color:#d97706">⚡</div>
+          <div class="stat-icon stat-icon-warning">⚡</div>
           <div>
-            <div class="stat-value" style="color:#d97706">{{ avgEnergy() }}</div>
+            <div class="stat-value" style="color:var(--color-warning)">{{ avgEnergy() }}</div>
             <div class="stat-label">Energía promedio</div>
           </div>
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:24px">
+      <div class="card" class="mb-24">
         <div style="margin-bottom:12px;font-size:14px;font-weight:600;color:var(--color-text)">Estado de riesgo</div>
         <div class="progress-bar">
           <div class="progress-fill" [style.width.%]="riskBarWidth()" [style.background]="riskBarBg()"></div>
@@ -55,13 +56,13 @@ import { AuthService } from '../../../core/auth.service';
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:24px">
+      <div class="card" class="mb-24">
         <div style="margin-bottom:16px;font-size:14px;font-weight:600;color:var(--color-text)">Calendario de asistencias (últimos 30 días)</div>
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
           @for (d of calendarDays(); track d.label) {
             <div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:11px"
               [style.background]="d.checked ? '#dcfce7' : '#f1f5f9'"
-              [style.color]="d.checked ? '#166534' : '#94a3b8'"
+              [style.color]="d.checked ? '#166534' : 'var(--color-text-muted)'"
               [style.fontWeight]="d.checked ? '600' : '400'">
               {{ d.label }}
             </div>
@@ -131,14 +132,14 @@ export class MemberProgressComponent {
 
   riskColor = computed(() => {
     const s = this.riskScore();
-    if (!s) return '#94a3b8';
-    return s >= 0.7 ? '#dc2626' : s >= 0.4 ? '#d97706' : '#059669';
+    if (!s) return 'var(--color-text-muted)';
+    return s >= 0.7 ? 'var(--color-danger)' : s >= 0.4 ? 'var(--color-warning)' : 'var(--color-success)';
   });
 
   riskBarBg = computed(() => {
     const s = this.riskScore();
-    if (!s) return '#94a3b8';
-    return s >= 0.7 ? '#dc2626' : s >= 0.4 ? '#d97706' : '#059669';
+    if (!s) return 'var(--color-text-muted)';
+    return s >= 0.7 ? 'var(--color-danger)' : s >= 0.4 ? 'var(--color-warning)' : 'var(--color-success)';
   });
 
   formatDate(d: string): string {

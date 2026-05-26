@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth.service';
@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/auth.service';
 @Component({
   selector: 'app-member-notifications',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-fade" style="max-width:640px">
       <div class="page-header">
@@ -24,9 +25,9 @@ import { AuthService } from '../../../core/auth.service';
       <div style="display:flex;flex-direction:column;gap:12px">
         @for (n of notifications(); track n.id) {
           <div class="notif-item" [class.notif-read]="n.status === 'read'" (click)="markRead(n)" style="cursor:pointer"
-               [style.border-left]="'4px solid ' + (n.status === 'pending' ? '#4f46e5' : n.status === 'read' ? '#94a3b8' : n.status === 'sent' ? '#059669' : '#dc2626')"
+               [style.border-left]="'4px solid ' + (n.status === 'pending' ? 'var(--color-primary)' : n.status === 'read' ? 'var(--color-text-muted)' : n.status === 'sent' ? 'var(--color-success)' : 'var(--color-danger)')"
                [attr.aria-label]="'Notificación: ' + n.message + '. ' + (n.status === 'read' ? 'Leída' : 'Haz clic para marcar como leída')">
-            <div class="notif-dot" [style.background]="n.status === 'pending' ? '#eef2ff' : n.status === 'read' ? '#f1f5f9' : n.status === 'sent' ? '#ecfdf5' : '#fef2f2'">
+            <div class="notif-dot" [style.background]="n.status === 'pending' ? 'var(--color-primary-bg)' : n.status === 'read' ? '#f1f5f9' : n.status === 'sent' ? 'var(--color-success-bg)' : 'var(--color-danger-bg)'">
               {{ n.status === 'pending' ? '⏳' : n.status === 'read' ? '👁️' : n.status === 'sent' ? '✅' : '❌' }}
             </div>
             <div class="notif-content">

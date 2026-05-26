@@ -1,8 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="navbar">
       <div class="navbar-brand">
@@ -12,7 +13,7 @@ import { Component, input, output } from '@angular/core';
       <div class="navbar-right">
         <span class="badge badge-primary">{{ role() }}</span>
         <span style="font-size:14px;color:#475569;font-weight:500">{{ userName() }}</span>
-        <div class="avatar avatar-sm" style="background:#eef2ff;color:#4f46e5">
+        <div class="avatar avatar-sm" style="background:var(--color-primary-bg);color:var(--color-primary)">
           {{ userName().charAt(0) || '?' }}
         </div>
         <button (click)="logout.emit()" class="btn btn-ghost" style="gap:6px">

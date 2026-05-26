@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth.service';
@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-member-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
     <div class="animate-fade">
@@ -15,38 +16,38 @@ import { RouterLink } from '@angular/router';
         <p class="page-subtitle">Resumen de tu actividad en el gimnasio</p>
       </div>
 
-      <div class="grid-4" style="margin-bottom:24px">
+      <div class="grid-4" class="mb-24">
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eff6ff;color:#2563eb">📅</div>
+          <div class="stat-icon stat-icon-info">📅</div>
           <div>
-            <div class="stat-value" style="color:#2563eb">{{ attendanceCount()?.count ?? 0 }}</div>
+            <div class="stat-value" style="color:var(--color-info)">{{ attendanceCount()?.count ?? 0 }}</div>
             <div class="stat-label">Asistencias (7d)</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eef2ff;color:#4f46e5">📊</div>
+          <div class="stat-icon stat-icon-primary">📊</div>
           <div>
             <div class="stat-value" [style.color]="riskColor()">{{ riskFormatted() }}</div>
             <div class="stat-label">Score de riesgo</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#ecfdf5;color:#059669">⭐</div>
+          <div class="stat-icon stat-icon-success">⭐</div>
           <div>
-            <div class="stat-value" style="color:#059669">{{ avgEffort() }}</div>
+            <div class="stat-value" style="color:var(--color-success)">{{ avgEffort() }}</div>
             <div class="stat-label">Esfuerzo promedio</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#fffbeb;color:#d97706">🔔</div>
+          <div class="stat-icon stat-icon-warning">🔔</div>
           <div>
-            <div class="stat-value" style="color:#d97706">{{ notifications().length }}</div>
+            <div class="stat-value" style="color:var(--color-warning)">{{ notifications().length }}</div>
             <div class="stat-label">Notificaciones</div>
           </div>
         </div>
       </div>
 
-      <div class="grid-2" style="margin-bottom:24px">
+      <div class="grid-2" class="mb-24">
         <div class="card">
           <div class="card-header">
             <span class="card-title">Estado de riesgo</span>
@@ -75,7 +76,7 @@ import { RouterLink } from '@angular/router';
       </div>
 
       @if (notifications().length > 0) {
-        <div class="card" style="margin-bottom:24px">
+        <div class="card" class="mb-24">
           <div class="card-header">
             <span class="card-title">Notificaciones recientes</span>
             <a [routerLink]="['/member/notifications']" style="font-size:13px;color:var(--color-primary);text-decoration:none">Ver todas</a>
@@ -151,14 +152,14 @@ export class MemberDashboardComponent {
 
   riskColor = computed(() => {
     const s = this.riskScore();
-    if (!s) return '#94a3b8';
-    return s >= 0.7 ? '#dc2626' : s >= 0.4 ? '#d97706' : '#059669';
+    if (!s) return 'var(--color-text-muted)';
+    return s >= 0.7 ? 'var(--color-danger)' : s >= 0.4 ? 'var(--color-warning)' : 'var(--color-success)';
   });
 
   riskBarBg = computed(() => {
     const s = this.riskScore();
-    if (!s) return '#94a3b8';
-    return s >= 0.7 ? '#dc2626' : s >= 0.4 ? '#d97706' : '#059669';
+    if (!s) return 'var(--color-text-muted)';
+    return s >= 0.7 ? 'var(--color-danger)' : s >= 0.4 ? 'var(--color-warning)' : 'var(--color-success)';
   });
 
   riskMessage = computed(() => {

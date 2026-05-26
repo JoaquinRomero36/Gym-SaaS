@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -6,11 +6,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-member-detail',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-fade">
       @if (member(); as m) {
-        <div class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
-          <div class="avatar avatar-lg" style="background:#eef2ff;color:#4f46e5">{{ m.name.charAt(0) }}</div>
+        <div class="card" style="display:flex;align-items:center;gap:16px">
+          <div class="avatar avatar-lg" style="background:var(--color-primary-bg);color:var(--color-primary)">{{ m.name.charAt(0) }}</div>
           <div style="flex:1">
             <h1 style="font-size:20px;font-weight:700;margin:0 0 4px">{{ m.name }}</h1>
             <p style="font-size:14px;color:var(--color-text-secondary);margin:0">{{ m.email }} · {{ m.level }}</p>
@@ -28,31 +29,31 @@ import { toSignal } from '@angular/core/rxjs-interop';
           </div>
         </div>
         @if (actionMsg()) {
-          <div style="background:var(--color-success-bg, #ecfdf5);color:var(--color-success, #059669);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ actionMsg() }}</div>
+          <div style="background:var(--color-success-bg, var(--color-success-bg));color:var(--color-success, var(--color-success));padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ actionMsg() }}</div>
         }
         @if (actionError()) {
-          <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ actionError() }}</div>
+          <div class="alert alert-danger mb-16">{{ actionError() }}</div>
         }
 
-        <div class="grid-3" style="margin-bottom:24px">
+        <div class="grid-3" class="mb-24">
           <div class="stat-card">
-            <div class="stat-icon" style="background:#fef2f2;color:#dc2626">⚠️</div>
+            <div class="stat-icon stat-icon-danger">⚠️</div>
             <div>
               <div class="stat-value" [style.color]="riskColor()">{{ risk()?.score?.toFixed(2) ?? '-' }}</div>
               <div class="stat-label">Score de riesgo</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:#eff6ff;color:#2563eb">📅</div>
+            <div class="stat-icon stat-icon-info">📅</div>
             <div>
-              <div class="stat-value" style="color:#2563eb">{{ lastDate() }}</div>
+              <div class="stat-value" style="color:var(--color-info)">{{ lastDate() }}</div>
               <div class="stat-label">Última asistencia</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:#ecfdf5;color:#059669">⭐</div>
+            <div class="stat-icon stat-icon-success">⭐</div>
             <div>
-              <div class="stat-value" style="color:#059669">{{ feedbacks().length }}</div>
+              <div class="stat-value" style="color:var(--color-success)">{{ feedbacks().length }}</div>
               <div class="stat-label">Feedbacks</div>
             </div>
           </div>
@@ -105,8 +106,8 @@ export class MemberDetailComponent {
 
   riskColor = computed(() => {
     const s = this.risk()?.score;
-    if (!s) return '#94a3b8';
-    return s >= 0.7 ? '#dc2626' : s >= 0.4 ? '#d97706' : '#059669';
+    if (!s) return 'var(--color-text-muted)';
+    return s >= 0.7 ? 'var(--color-danger)' : s >= 0.4 ? 'var(--color-warning)' : 'var(--color-success)';
   });
 
   calcRisk() {

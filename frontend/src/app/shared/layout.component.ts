@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { NavbarComponent } from './navbar.component';
@@ -7,6 +7,7 @@ import { SidebarComponent, NavItem } from './sidebar.component';
 @Component({
   selector: 'app-layout',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, NavbarComponent, SidebarComponent],
   template: `
     <div style="display:flex;flex-direction:column;height:100vh">

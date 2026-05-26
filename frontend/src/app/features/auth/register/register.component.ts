@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -10,6 +10,7 @@ import { AuthResponse } from '../../../core/types';
 @Component({
   selector: 'app-register',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, RouterLink],
   template: `
     <div class="landing-gradient flex-center" style="min-height:100vh;padding:24px">
@@ -45,12 +46,12 @@ import { AuthResponse } from '../../../core/types';
             </div>
 
             @if (error()) {
-              <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px">
+              <div class="alert alert-danger">
                 {{ error() }}
               </div>
             }
             @if (success()) {
-              <div style="background:var(--color-success-bg);color:var(--color-success);padding:12px 16px;border-radius:var(--radius-md);font-size:13px">
+              <div class="alert alert-success">
                 {{ success() }}
               </div>
             }

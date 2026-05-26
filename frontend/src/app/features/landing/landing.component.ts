@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
     <div class="landing-gradient">
@@ -19,7 +20,7 @@ import { RouterLink } from '@angular/router';
       </nav>
 
       <section style="max-width:1200px;margin:0 auto;padding:80px 32px 64px;text-align:center">
-        <div style="display:inline-flex;align-items:center;gap:8px;background:#eef2ff;color:#4f46e5;font-size:14px;font-weight:500;padding:6px 16px;border-radius:999px;margin-bottom:24px">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:var(--color-primary-bg);color:var(--color-primary);font-size:14px;font-weight:500;padding:6px 16px;border-radius:999px">
           🤖 IA aplicada a retención de clientes
         </div>
         <h1 class="hero-title" style="max-width:720px;margin:0 auto 16px">
@@ -39,17 +40,17 @@ import { RouterLink } from '@angular/router';
       <section style="max-width:1200px;margin:0 auto;padding:0 32px 80px">
         <div class="grid-3">
           <div class="feature-card">
-            <div class="feature-icon" style="background:#eef2ff;color:#4f46e5">📊</div>
+            <div class="feature-icon" style="background:var(--color-primary-bg);color:var(--color-primary)">📊</div>
             <h3 class="feature-title">Predicción de abandono</h3>
             <p class="feature-desc">Modelo ML que analiza 7 features de comportamiento y calcula score de riesgo en tiempo real.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon" style="background:#ecfdf5;color:#059669">💬</div>
+            <div class="feature-icon" style="background:var(--color-success-bg);color:var(--color-success)">💬</div>
             <h3 class="feature-title">Mensajería automatizada</h3>
             <p class="feature-desc">Mensajes personalizados generados por IA según el nivel, actividad y estado de cada miembro.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon" style="background:#fffbeb;color:#d97706">👥</div>
+            <div class="feature-icon" style="background:var(--color-warning-bg);color:var(--color-warning)">👥</div>
             <h3 class="feature-title">Multi-tenant SaaS</h3>
             <p class="feature-desc">Arquitectura multi-gimnasio con aislamiento de datos, roles y paneles separados por perfil.</p>
           </div>

@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -8,6 +8,7 @@ import { lastValueFrom } from 'rxjs';
 @Component({
   selector: 'app-coach-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   styles: [`
     .quick-btn {
@@ -16,7 +17,7 @@ import { lastValueFrom } from 'rxjs';
       background:#fff;color:#64748b;cursor:pointer;transition:all .15s;
       padding:0;flex-shrink:0;
     }
-    .quick-btn:hover { background:#f1f5f9;color:#4f46e5;border-color:#c7d2fe; }
+    .quick-btn:hover { background:#f1f5f9;color:var(--color-primary);border-color:#c7d2fe; }
     .quick-btn.loading { opacity:.5;pointer-events:none;animation:spin .6s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
   `],
@@ -27,25 +28,25 @@ import { lastValueFrom } from 'rxjs';
         <p class="page-subtitle">{{ members().length }} miembros asignados</p>
       </div>
 
-      <div class="grid-3" style="margin-bottom:24px">
+      <div class="grid-3" class="mb-24">
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eef2ff;color:#4f46e5">👥</div>
+          <div class="stat-icon stat-icon-primary">👥</div>
           <div>
-            <div class="stat-value" style="color:#4f46e5">{{ members().length }}</div>
+            <div class="stat-value" style="color:var(--color-primary)">{{ members().length }}</div>
             <div class="stat-label">Total miembros</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eff6ff;color:#2563eb">✅</div>
+          <div class="stat-icon stat-icon-info">✅</div>
           <div>
-            <div class="stat-value" style="color:#2563eb">{{ activeMembers() }}</div>
+            <div class="stat-value" style="color:var(--color-info)">{{ activeMembers() }}</div>
             <div class="stat-label">Activos</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#fef2f2;color:#dc2626">⚠️</div>
+          <div class="stat-icon stat-icon-danger">⚠️</div>
           <div>
-            <div class="stat-value" style="color:#dc2626">{{ highRiskCount() }}</div>
+            <div class="stat-value" style="color:var(--color-danger)">{{ highRiskCount() }}</div>
             <div class="stat-label">Alto riesgo</div>
           </div>
         </div>
@@ -59,11 +60,11 @@ import { lastValueFrom } from 'rxjs';
           <a routerLink="/coach/routines/create" class="btn btn-primary" style="margin-top:16px">+ Nueva rutina</a>
         </div>
       }
-      <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="stagger" style="display:flex;flex-direction:column;gap:8px">
         @for (m of members(); track m.id) {
           <a [routerLink]="['/coach/members', m.id]" class="member-card">
             <div style="display:flex;align-items:center;gap:16px">
-              <div class="avatar" style="background:#eef2ff;color:#4f46e5">{{ m.name.charAt(0) }}</div>
+              <div class="avatar" style="background:var(--color-primary-bg);color:var(--color-primary)">{{ m.name.charAt(0) }}</div>
               <div>
                 <div style="font-weight:600;font-size:14px;margin-bottom:2px">{{ m.name }}</div>
                 <div style="font-size:13px;color:var(--color-text-secondary)">{{ m.email }} · {{ m.level }}</div>
@@ -84,7 +85,7 @@ import { lastValueFrom } from 'rxjs';
               <button type="button" class="quick-btn" [class.loading]="loadingMsg().has(m.id)" (click)="sendMessage($event, m)" style="margin-right:4px" title="Enviar mensaje" [attr.aria-label]="'Enviar mensaje a ' + m.name">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
               </button>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2">
                 <path d="M9 5l7 7-7 7"/>
               </svg>
             </div>

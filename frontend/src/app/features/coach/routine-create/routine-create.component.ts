@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,6 +11,7 @@ function newId() { return ++_id; }
 @Component({
   selector: 'app-routine-create',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   template: `
     <div class="animate-fade" style="max-width:640px">
@@ -43,19 +44,19 @@ function newId() { return ++_id; }
 
           <div style="display:flex;flex-direction:column;gap:8px">
             @for (e of exercises(); track e._id) {
-              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-radius:var(--radius-md)">
-                <span style="font-size:13px;font-weight:700;color:#94a3b8;width:20px;text-align:center">{{ e._id }}</span>
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--color-bg);border-radius:var(--radius-md)">
+                <span style="font-size:13px;font-weight:700;color:var(--color-text-muted);width:20px;text-align:center">{{ e._id }}</span>
                 <input [(ngModel)]="e.name" [name]="'name_'+e._id" placeholder="Nombre" class="input" style="flex:1;font-size:13px;padding:8px 12px">
                 <input [(ngModel)]="e.sets" [name]="'sets_'+e._id" type="number" placeholder="S" class="input" style="width:56px;text-align:center;font-size:13px;padding:8px">
                 <input [(ngModel)]="e.reps" [name]="'reps_'+e._id" type="number" placeholder="R" class="input" style="width:56px;text-align:center;font-size:13px;padding:8px">
-                <button type="button" (click)="removeExercise(e._id)" class="btn btn-ghost" style="color:#dc2626;padding:4px">✕</button>
+                <button type="button" (click)="removeExercise(e._id)" class="btn btn-ghost" style="color:var(--color-danger);padding:4px">✕</button>
               </div>
             }
           </div>
         </div>
 
         @if (error()) {
-          <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">{{ error() }}</div>
+          <div class="alert alert-danger mb-16">{{ error() }}</div>
         }
 
         <button type="submit" class="btn btn-primary" style="width:100%;height:44px">{{ editMode ? 'Actualizar rutina' : 'Guardar rutina' }}</button>

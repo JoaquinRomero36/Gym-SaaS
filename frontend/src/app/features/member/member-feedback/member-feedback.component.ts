@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth.service';
@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/auth.service';
 @Component({
   selector: 'app-member-feedback',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   template: `
     <div class="animate-fade" style="max-width:520px">
@@ -15,14 +16,14 @@ import { AuthService } from '../../../core/auth.service';
       </div>
 
       <form (ngSubmit)="onSubmit()" class="card">
-        <div style="margin-bottom:24px">
+        <div class="mb-24">
           <label class="input-label" style="margin-bottom:12px">Nivel de esfuerzo</label>
           <div style="display:flex;gap:8px">
             @for (n of [1,2,3,4,5]; track n) {
               <button type="button" (click)="effort.set(n)"
                       [style]="effort() === n
                         ? 'background:var(--color-primary);color:white;border-color:var(--color-primary);transform:scale(1.05)'
-                        : 'background:white;color:#94a3b8;border-color:#e2e8f0'"
+                        : 'background:white;color:var(--color-text-muted);border-color:#e2e8f0'"
                       style="flex:1;height:52px;border-radius:var(--radius-md);border:2px solid;font-size:18px;font-weight:700;cursor:pointer;transition:all 0.15s">
                 {{ n }}
               </button>
@@ -34,14 +35,14 @@ import { AuthService } from '../../../core/auth.service';
           </div>
         </div>
 
-        <div style="margin-bottom:24px">
+        <div class="mb-24">
           <label class="input-label" style="margin-bottom:12px">Nivel de energía</label>
           <div style="display:flex;gap:8px">
             @for (n of [1,2,3,4,5]; track n) {
               <button type="button" (click)="energy.set(n)"
                       [style]="energy() === n
-                        ? 'background:#059669;color:white;border-color:#059669;transform:scale(1.05)'
-                        : 'background:white;color:#94a3b8;border-color:#e2e8f0'"
+                        ? 'background:var(--color-success);color:white;border-color:var(--color-success);transform:scale(1.05)'
+                        : 'background:white;color:var(--color-text-muted);border-color:#e2e8f0'"
                       style="flex:1;height:52px;border-radius:var(--radius-md);border:2px solid;font-size:18px;font-weight:700;cursor:pointer;transition:all 0.15s">
                 {{ n }}
               </button>

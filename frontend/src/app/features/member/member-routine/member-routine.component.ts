@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/auth.service';
@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/auth.service';
 @Component({
   selector: 'app-member-routine',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="animate-fade" style="max-width:720px">
       <div class="page-header">
@@ -14,11 +15,11 @@ import { AuthService } from '../../../core/auth.service';
       </div>
 
       @if (completed()) {
-        <div class="card" style="border-left:4px solid #059669;background:#ecfdf5">
+        <div class="card" style="border-left:4px solid var(--color-success);background:var(--color-success-bg)">
           <div style="display:flex;align-items:center;gap:12px">
             <span style="font-size:28px">🎉</span>
             <div>
-              <div style="font-weight:600;font-size:15px;color:#059669">¡Sesión completada!</div>
+              <div style="font-weight:600;font-size:15px;color:var(--color-success)">¡Sesión completada!</div>
               <div style="font-size:13px;color:var(--color-text-secondary)">Has registrado tu asistencia de hoy.</div>
             </div>
           </div>
@@ -26,7 +27,7 @@ import { AuthService } from '../../../core/auth.service';
         <br>
       }
       @if (error()) {
-        <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px;margin-bottom:16px">
+        <div class="alert alert-danger mb-16">
           {{ error() }}
         </div>
       }
@@ -40,7 +41,7 @@ import { AuthService } from '../../../core/auth.service';
       }
 
       @for (r of routines(); track r.id) {
-        <div class="card" style="margin-bottom:24px">
+        <div class="card" class="mb-24">
           <div class="card-header">
             <div>
               <h2 style="font-size:17px;font-weight:600;margin:0 0 4px">{{ r.name }}</h2>

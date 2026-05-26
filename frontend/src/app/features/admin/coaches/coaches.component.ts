@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -7,10 +7,11 @@ import { AuthService } from '../../../core/auth.service';
 @Component({
   selector: 'app-admin-coaches',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   template: `
     <div class="animate-fade">
-      <div class="flex-between" style="margin-bottom:24px">
+      <div class="flex-between" class="mb-24">
         <div>
           <h1 class="page-title" style="margin:0">Coaches</h1>
           <p class="page-subtitle">{{ filteredCoaches().length }} coaches registrados</p>
@@ -50,7 +51,7 @@ import { AuthService } from '../../../core/auth.service';
                   <td style="color:var(--color-text-secondary)">{{ c.email }}</td>
                   <td>
                     <button class="btn btn-ghost" style="padding:4px 10px;font-size:13px" (click)="openEdit(c)">Editar</button>
-                    <button class="btn btn-ghost" style="padding:4px 10px;font-size:13px;color:#dc2626" (click)="deleteCoach(c)">Eliminar</button>
+                    <button class="btn btn-ghost" style="padding:4px 10px;font-size:13px;color:var(--color-danger)" (click)="deleteCoach(c)">Eliminar</button>
                   </td>
                 </tr>
               }
@@ -83,7 +84,7 @@ import { AuthService } from '../../../core/auth.service';
               </div>
             }
             @if (formError()) {
-              <div style="background:var(--color-danger-bg);color:var(--color-danger);padding:12px 16px;border-radius:var(--radius-md);font-size:13px">{{ formError() }}</div>
+              <div class="alert alert-danger">{{ formError() }}</div>
             }
             <button type="submit" class="btn btn-primary" style="width:100%">{{ editingCoach() ? 'Guardar cambios' : 'Crear coach' }}</button>
           </form>

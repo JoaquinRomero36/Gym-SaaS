@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { RouterLink, Router } from '@angular/router';
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
     <div class="animate-fade">
@@ -14,42 +15,42 @@ import { RouterLink, Router } from '@angular/router';
         <p class="page-subtitle">Métricas globales del sistema</p>
       </div>
 
-      <div class="grid-3" style="margin-bottom:24px">
+      <div class="grid-3" class="mb-24">
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eef2ff;color:#4f46e5">👥</div>
+          <div class="stat-icon stat-icon-primary">👥</div>
           <div>
-            <div class="stat-value" style="color:#4f46e5">{{ stats()?.totalUsers ?? '-' }}</div>
+            <div class="stat-value" style="color:var(--color-primary)">{{ stats()?.totalUsers ?? '-' }}</div>
             <div class="stat-label">Total usuarios</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#fffbeb;color:#d97706">⚠️</div>
+          <div class="stat-icon stat-icon-warning">⚠️</div>
           <div>
-            <div class="stat-value" style="color:#d97706">{{ stats()?.usersAtHighRisk ?? '-' }}</div>
+            <div class="stat-value" style="color:var(--color-warning)">{{ stats()?.usersAtHighRisk ?? '-' }}</div>
             <div class="stat-label">En riesgo alto</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#ecfdf5;color:#059669">📨</div>
+          <div class="stat-icon stat-icon-success">📨</div>
           <div>
-            <div class="stat-value" style="color:#059669">{{ stats()?.notificationsSentToday ?? '-' }}</div>
+            <div class="stat-value" style="color:var(--color-success)">{{ stats()?.notificationsSentToday ?? '-' }}</div>
             <div class="stat-label">Mensajes enviados hoy</div>
           </div>
         </div>
       </div>
 
-      <div class="grid-4" style="margin-bottom:24px">
+      <div class="grid-4" class="mb-24">
         <div class="stat-card">
-          <div class="stat-icon" style="background:#eff6ff;color:#2563eb">✅</div>
+          <div class="stat-icon stat-icon-info">✅</div>
           <div>
-            <div class="stat-value" style="color:#2563eb">{{ stats()?.activeUsers ?? '-' }}</div>
+            <div class="stat-value" style="color:var(--color-info)">{{ stats()?.activeUsers ?? '-' }}</div>
             <div class="stat-label">Activos</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#fef2f2;color:#dc2626">🚪</div>
+          <div class="stat-icon stat-icon-danger">🚪</div>
           <div>
-            <div class="stat-value" style="color:#dc2626">{{ stats()?.churnedUsers ?? '-' }}</div>
+            <div class="stat-value" style="color:var(--color-danger)">{{ stats()?.churnedUsers ?? '-' }}</div>
             <div class="stat-label">Churned</div>
           </div>
         </div>
@@ -61,7 +62,7 @@ import { RouterLink, Router } from '@angular/router';
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon" style="background:#f8fafc;color:#475569">📊</div>
+          <div class="stat-icon stat-icon-muted">📊</div>
           <div>
             <div class="stat-value" style="color:#475569">{{ stats()?.usersAtLowRisk ?? '-' }}</div>
             <div class="stat-label">Riesgo bajo</div>
@@ -69,7 +70,7 @@ import { RouterLink, Router } from '@angular/router';
         </div>
       </div>
 
-      <div class="grid-2" style="margin-bottom:24px">
+      <div class="grid-2" class="mb-24">
         <div class="card">
           <div class="card-header">
             <span class="card-title">Desglose por estado</span>
@@ -145,16 +146,16 @@ export class DashboardComponent {
     if (!s) return [];
     const total = s.totalUsers || 1;
     return [
-      { label: 'Activos', count: s.activeUsers ?? 0, pct: ((s.activeUsers ?? 0) / total) * 100, color: '#059669' },
-      { label: 'Inactivos', count: s.inactiveUsers ?? 0, pct: ((s.inactiveUsers ?? 0) / total) * 100, color: '#94a3b8' },
-      { label: 'Churned', count: s.churnedUsers ?? 0, pct: ((s.churnedUsers ?? 0) / total) * 100, color: '#dc2626' },
+      { label: 'Activos', count: s.activeUsers ?? 0, pct: ((s.activeUsers ?? 0) / total) * 100, color: 'var(--color-success)' },
+      { label: 'Inactivos', count: s.inactiveUsers ?? 0, pct: ((s.inactiveUsers ?? 0) / total) * 100, color: 'var(--color-text-muted)' },
+      { label: 'Churned', count: s.churnedUsers ?? 0, pct: ((s.churnedUsers ?? 0) / total) * 100, color: 'var(--color-danger)' },
     ];
   });
 
   riskScoreColor(score: number): string {
-    if (score >= 0.7) return '#dc2626';
-    if (score >= 0.4) return '#d97706';
-    return '#059669';
+    if (score >= 0.7) return 'var(--color-danger)';
+    if (score >= 0.4) return 'var(--color-warning)';
+    return 'var(--color-success)';
   }
 
   viewUser(userId: string) {
