@@ -10,54 +10,91 @@ import { AuthResponse } from '../../../core/types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, RouterLink],
   template: `
-    <div class="landing-gradient flex-center" style="min-height:100vh;padding:24px">
+    <div class="landing-gradient flex-center" style="min-height:100vh;padding: var(--space-6)">
       <div style="width:100%;max-width:420px">
-        <div style="text-align:center;margin-bottom:32px">
-          <div class="navbar-logo" style="margin:0 auto 16px;width:56px;height:56px;font-size:24px">G</div>
-          <h1 style="font-size:22px;font-weight:700;margin:0 0 4px">AI Gym Retention</h1>
-          <p style="font-size:14px;color:var(--color-text-secondary);margin:0">Iniciá sesión para continuar</p>
+        <div style="text-align:center;margin-bottom: var(--space-7)">
+          <a routerLink="/" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none">
+            <div class="navbar-logo" style="width:48px;height:48px;font-size:22px">G</div>
+          </a>
+          <h1 style="font-family:var(--font-display);font-size:24px;font-weight:500;letter-spacing:-0.015em;margin:16px 0 4px">Iniciar sesión</h1>
+          <p style="font-size:14px;color:var(--color-text-secondary);margin:0">Ingresá a tu cuenta para continuar</p>
         </div>
 
-        <div class="card">
-          <form (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;gap:20px">
+        <div class="card animate-fade">
+          <form (ngSubmit)="onSubmit()" class="stack" style="gap: var(--space-5)">
             <div class="input-group">
-              <label class="input-label">Email</label>
-              <input [(ngModel)]="email" name="email" type="email" placeholder="tu@email.com" class="input" autocomplete="email" required>
+              <label class="input-label" for="login-email">Email</label>
+              <input
+                id="login-email"
+                [(ngModel)]="email"
+                name="email"
+                type="email"
+                placeholder="tu@email.com"
+                class="input"
+                autocomplete="email"
+                required>
             </div>
             <div class="input-group">
-              <label class="input-label">Contraseña</label>
-              <input [(ngModel)]="password" name="password" type="password" placeholder="••••••••" class="input" autocomplete="current-password" required>
+              <label class="input-label" for="login-pass">Contraseña</label>
+              <input
+                id="login-pass"
+                [(ngModel)]="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                class="input"
+                autocomplete="current-password"
+                required>
             </div>
 
             @if (error()) {
-              <div class="alert alert-danger" role="alert" aria-live="polite">
-                {{ error() }}
+              <div class="alert alert-danger" role="alert">
+                <span class="alert-icon">!</span>
+                <div class="alert-content">{{ error() }}</div>
               </div>
             }
 
-            <button type="submit" [disabled]="loading()" class="btn btn-primary" style="height:44px">
+            <button type="submit" [disabled]="loading()" class="btn btn-primary btn-block" style="height:44px">
               @if (loading()) {
-                <div class="spinner"></div>
-                Ingresando...
-              } @else { Ingresar }
+                <span class="spinner"></span>
+                <span>Ingresando…</span>
+              } @else {
+                <span>Ingresar</span>
+              }
             </button>
           </form>
 
-          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-light);text-align:center">
-            <p style="color:var(--color-text-secondary);margin:0">
-              ¿No tenés cuenta? <a routerLink="/register" style="color:var(--color-primary);font-weight:500;text-decoration:none">Registrate</a>
-            </p>
-          </div>
+          <div class="divider" style="margin: var(--space-5) 0 var(--space-4)"></div>
 
-          <div style="margin-top:16px;background:var(--color-bg);border-radius:var(--radius-md);padding:12px">
-            <p style="font-weight:600;color:var(--color-text-secondary);margin:0 0 8px">Credenciales de prueba:</p>
-            <div style="color:var(--color-text-muted);display:flex;flex-direction:column;gap:4px">
-              <span>Admin: <strong style="color:var(--color-text)">admin&#64;gym.com / admin123</strong></span>
-              <span>Coach: <strong style="color:var(--color-text)">coach&#64;gym.com / coach123</strong></span>
-              <span>Member: <strong style="color:var(--color-text)">member&#64;gym.com / member123</strong></span>
+          <p style="color:var(--color-text-secondary);margin:0;text-align:center;font-size:14px">
+            ¿No tenés cuenta?
+            <a routerLink="/register" style="color:var(--color-primary);font-weight:500">Registrate</a>
+          </p>
+
+          @if (showDemoCredentials) {
+            <div style="margin-top: var(--space-5);background:var(--color-bg-elevated);border-radius:var(--radius-md);padding:14px;border:1px dashed var(--color-border)">
+              <div style="font-weight:600;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:8px">Credenciales de prueba</div>
+              <div class="stack-sm" style="font-size:13px;color:var(--color-text-secondary)">
+                <div class="row-between">
+                  <span>Admin</span>
+                  <span style="font-family:var(--font-mono);color:var(--color-text)">admin&#64;gym.com / admin123</span>
+                </div>
+                <div class="row-between">
+                  <span>Coach</span>
+                  <span style="font-family:var(--font-mono);color:var(--color-text)">coach&#64;gym.com / coach123</span>
+                </div>
+                <div class="row-between">
+                  <span>Member</span>
+                  <span style="font-family:var(--font-mono);color:var(--color-text)">member&#64;gym.com / member123</span>
+                </div>
+              </div>
             </div>
-          </div>
+          }
         </div>
+
+        <p style="text-align:center;margin-top: var(--space-5);font-size:12px;color:var(--color-text-muted)">
+          © AI Gym Retention · Demo project
+        </p>
       </div>
     </div>
   `,
@@ -65,10 +102,13 @@ import { AuthResponse } from '../../../core/types';
 export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+
   email = '';
   password = '';
   loading = signal(false);
   error = signal('');
+
+  showDemoCredentials = !this.isProduction();
 
   onSubmit() {
     this.error.set('');
@@ -77,12 +117,17 @@ export class LoginComponent {
       next: (res: AuthResponse) => {
         this.loading.set(false);
         const role = res.user.role;
-        this.router.navigate([`/${role === 'member' ? 'member/dashboard' : role + '/dashboard'}`]);
+        this.router.navigate([`/${role}/dashboard`]);
       },
       error: () => {
         this.loading.set(false);
         this.error.set('Credenciales inválidas. Verificá tu email y contraseña.');
       },
     });
+  }
+
+  private isProduction(): boolean {
+    try { return (window as any).__env?.production ?? false; }
+    catch { return false; }
   }
 }

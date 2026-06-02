@@ -1,46 +1,109 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterRequest, UserInfo } from './types';
+import {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+  UserInfo,
+  RefreshResponse,
+} from './types';
+
+const STORAGE_KEY = 'auth';
+
+interface PersistedAuth {
+  access_token: string;
+  refresh_token: string;
+  user: UserInfo;
+}
+
+function readPersisted(): PersistedAuth | null {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as PersistedAuth) : null;
+  } catch {
+    return null;
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API = '/api/v1/auth';
-  readonly user = signal<UserInfo | null>(null);
-  readonly token = signal<string | null>(null);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
 
-  constructor(private http: HttpClient, private router: Router) {
-    const saved = localStorage.getItem('auth');
-    if (saved) {
-      const data: AuthResponse = JSON.parse(saved);
-      this.token.set(data.access_token);
-      this.user.set(data.user);
-    }
-  }
+  private readonly API = '/api/v1/auth';
+
+  private readonly initial = readPersisted();
+  readonly accessToken = signal<string | null>(this.initial?.access_token ?? null);
+  readonly refreshToken = signal<string | null>(this.initial?.refresh_token ?? null);
+  readonly user = signal<UserInfo | null>(this.initial?.user ?? null);
+
+  readonly isAuthenticated = computed(() => !!this.accessToken() && !!this.user());
+  readonly role = computed(() => this.user()?.role ?? null);
 
   login(data: LoginRequest) {
-    return this.http.post<AuthResponse>(`${this.API}/login`, data).pipe(
-      tap(res => this._save(res)),
-    );
+    return this.http
+      .post<AuthResponse>(`${this.API}/login`, data)
+      .pipe(tap(res => this.persist(res)));
   }
 
   register(data: RegisterRequest) {
-    return this.http.post<AuthResponse>(`${this.API}/register`, data).pipe(
-      tap(res => this._save(res)),
-    );
+    return this.http
+      .post<AuthResponse>(`${this.API}/register`, data)
+      .pipe(tap(res => this.persist(res)));
   }
 
-  logout() {
-    localStorage.removeItem('auth');
-    this.token.set(null);
+  refresh() {
+    const token = this.refreshToken();
+    if (!token) {
+      this.logout();
+      throw new Error('No refresh token');
+    }
+    return this.http
+      .post<RefreshResponse>(`${this.API}/refresh`, { refresh_token: token })
+      .pipe(
+        tap(res => {
+          this.accessToken.set(res.access_token);
+          this.refreshToken.set(res.refresh_token);
+          this.writeStorage();
+        }),
+      );
+  }
+
+  updateTokens(access: string, refresh: string) {
+    this.accessToken.set(access);
+    this.refreshToken.set(refresh);
+    this.writeStorage();
+  }
+
+  logout(redirect: boolean = true) {
+    if (isPlatformBrowser(this.platformId)) {
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    }
+    this.accessToken.set(null);
+    this.refreshToken.set(null);
     this.user.set(null);
-    this.router.navigate(['/login']);
+    if (redirect) this.router.navigate(['/login']);
   }
 
-  private _save(res: AuthResponse) {
-    localStorage.setItem('auth', JSON.stringify(res));
-    this.token.set(res.access_token);
+  private persist(res: AuthResponse) {
+    this.accessToken.set(res.access_token);
+    this.refreshToken.set(res.refresh_token);
     this.user.set(res.user);
+    this.writeStorage();
+  }
+
+  private writeStorage() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const payload: PersistedAuth = {
+      access_token: this.accessToken()!,
+      refresh_token: this.refreshToken()!,
+      user: this.user()!,
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch {}
   }
 }

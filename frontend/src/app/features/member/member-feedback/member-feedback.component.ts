@@ -1,6 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 
@@ -8,73 +7,157 @@ import { AuthService } from '../../../core/auth.service';
   selector: 'app-member-feedback',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
   template: `
-    <div class="animate-fade" style="max-width:520px">
+    <div style="max-width:560px">
       <div class="page-header">
-        <h1 class="page-title">Feedback de la sesión</h1>
-        <p class="page-subtitle">Decinos cómo te sentiste después de entrenar</p>
+        <div>
+          <div class="page-eyebrow">Feedback</div>
+          <h1 class="page-title">¿Cómo te sentiste hoy?</h1>
+          <p class="page-subtitle">Tu feedback ayuda a tu coach a entender tu progreso</p>
+        </div>
       </div>
 
-      <form (ngSubmit)="onSubmit()" class="card">
-        <div class="mb-24">
-          <label class="input-label" style="margin-bottom:12px">Nivel de esfuerzo</label>
-          <div style="display:flex;gap:8px">
+      <form (ngSubmit)="onSubmit()" class="card stack-lg">
+        <div>
+          <div class="row-between" style="margin-bottom: var(--space-3)">
+            <label class="input-label" for="effort">Nivel de esfuerzo</label>
+            <span class="badge" [class]="effortBadgeClass()">{{ effortLabel() }}</span>
+          </div>
+          <div class="rating-row" role="radiogroup" aria-labelledby="effort">
             @for (n of [1,2,3,4,5]; track n) {
-              <button type="button" (click)="effort.set(n)"
-                      [style]="effort() === n
-                        ? 'background:var(--color-primary);color:white;border-color:var(--color-primary);transform:scale(1.05)'
-                        : 'background:white;color:var(--color-text-muted);border-color:#e2e8f0'"
-                      style="flex:1;height:52px;border-radius:var(--radius-md);border:2px solid;font-size:18px;font-weight:700;cursor:pointer;transition:all 0.15s">
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-checked]="effort() === n"
+                class="rating-btn"
+                [class.selected-effort]="effort() === n"
+                (click)="effort.set(n)">
                 {{ n }}
               </button>
             }
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-muted);margin-top:6px;padding:0 4px">
+          <div class="row-between" style="font-size:11px;color:var(--color-text-muted);margin-top:8px;letter-spacing:0.04em;text-transform:uppercase">
             <span>Muy fácil</span>
-            <span>Muy intenso</span>
+            <span>Al límite</span>
           </div>
         </div>
 
-        <div class="mb-24">
-          <label class="input-label" style="margin-bottom:12px">Nivel de energía</label>
-          <div style="display:flex;gap:8px">
+        <div>
+          <div class="row-between" style="margin-bottom: var(--space-3)">
+            <label class="input-label" for="energy">Nivel de energía</label>
+            <span class="badge" [class]="energyBadgeClass()">{{ energyLabel() }}</span>
+          </div>
+          <div class="rating-row" role="radiogroup" aria-labelledby="energy">
             @for (n of [1,2,3,4,5]; track n) {
-              <button type="button" (click)="energy.set(n)"
-                      [style]="energy() === n
-                        ? 'background:var(--color-success);color:white;border-color:var(--color-success);transform:scale(1.05)'
-                        : 'background:white;color:var(--color-text-muted);border-color:#e2e8f0'"
-                      style="flex:1;height:52px;border-radius:var(--radius-md);border:2px solid;font-size:18px;font-weight:700;cursor:pointer;transition:all 0.15s">
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-checked]="energy() === n"
+                class="rating-btn"
+                [class.selected-energy]="energy() === n"
+                (click)="energy.set(n)">
                 {{ n }}
               </button>
             }
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-muted);margin-top:6px;padding:0 4px">
-            <span>Sin energía</span>
+          <div class="row-between" style="font-size:11px;color:var(--color-text-muted);margin-top:8px;letter-spacing:0.04em;text-transform:uppercase">
+            <span>Agotado</span>
             <span>Lleno de energía</span>
           </div>
         </div>
 
         @if (sent()) {
-          <div style="background:var(--color-success-bg);color:var(--color-success);padding:12px 16px;border-radius:var(--radius-md);margin-bottom:16px;display:flex;align-items:center;gap:8px">
-            ✅ ¡Feedback registrado! Seguí así 💪
+          <div class="alert alert-success" role="status">
+            <span class="alert-icon">✓</span>
+            <div class="alert-content">¡Feedback registrado! Redirigiendo al panel…</div>
           </div>
         }
 
-        <button type="submit" [disabled]="sent()" class="btn btn-primary" style="width:100%;height:44px">
-          {{ sent() ? 'Enviado' : 'Enviar feedback' }}
+        <button type="submit" [disabled]="sent()" class="btn btn-primary btn-block" style="height:46px">
+          @if (sent()) {
+            <span>✓ Enviado</span>
+          } @else {
+            <span>Enviar feedback</span>
+          }
         </button>
       </form>
     </div>
   `,
+  styles: [`
+    .rating-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .rating-btn {
+      height: 56px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+    .rating-btn:hover {
+      border-color: var(--color-border-strong);
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+    .rating-btn:focus-visible {
+      outline: none;
+      box-shadow: var(--shadow-ring);
+    }
+    .selected-effort {
+      background: var(--color-primary) !important;
+      border-color: var(--color-primary) !important;
+      color: var(--color-text-inverse) !important;
+      transform: scale(1.04);
+      box-shadow: 0 4px 12px rgba(22, 56, 41, 0.2);
+    }
+    .selected-energy {
+      background: var(--color-accent) !important;
+      border-color: var(--color-accent) !important;
+      color: white !important;
+      transform: scale(1.04);
+      box-shadow: 0 4px 12px rgba(184, 137, 58, 0.25);
+    }
+  `],
 })
 export class MemberFeedbackComponent {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
   private router = inject(Router);
+
   effort = signal(3);
   energy = signal(3);
   sent = signal(false);
+
+  effortLabel = () => {
+    const labels = ['', 'Muy fácil', 'Suave', 'Moderado', 'Intenso', 'Al límite'];
+    return labels[this.effort()];
+  };
+
+  energyLabel = () => {
+    const labels = ['', 'Agotado', 'Bajo', 'Normal', 'Activo', 'Imparable'];
+    return labels[this.energy()];
+  };
+
+  effortBadgeClass = () => {
+    const e = this.effort();
+    if (e >= 4) return 'badge-danger';
+    if (e === 3) return 'badge-warning';
+    return 'badge-success';
+  };
+
+  energyBadgeClass = () => {
+    const e = this.energy();
+    if (e >= 4) return 'badge-accent';
+    if (e === 3) return 'badge-success';
+    return 'badge-neutral';
+  };
 
   onSubmit() {
     const user = this.auth.user();
@@ -86,7 +169,7 @@ export class MemberFeedbackComponent {
       energy_level: this.energy(),
     }).subscribe(() => {
       this.sent.set(true);
-      this.router.navigate(['/member/dashboard']);
+      setTimeout(() => this.router.navigate(['/member/dashboard']), 900);
     });
   }
 }
