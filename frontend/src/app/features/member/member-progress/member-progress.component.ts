@@ -107,17 +107,24 @@ export class MemberProgressComponent {
   risk = toSignal(this.http.get<any>(`/api/v1/risk/${this.userId}`));
   feedbackEntries = toSignal(this.http.get<any[]>(`/api/v1/feedback/user/${this.userId}`), { initialValue: [] });
 
+  private toLocalDateKey(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
   calendarDays = computed(() => {
     const dates = new Set<string>();
     for (const a of this.attendanceAll()) {
-      dates.add(a.date?.substring(0, 10));
+      if (a.date) {
+        const d = new Date(a.date);
+        dates.add(this.toLocalDateKey(d));
+      }
     }
     const days: { label: string; checked: boolean }[] = [];
     const now = new Date();
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
-      const key = d.toISOString().substring(0, 10);
+      const key = this.toLocalDateKey(d);
       days.push({ label: String(d.getDate()), checked: dates.has(key) });
     }
     return days;

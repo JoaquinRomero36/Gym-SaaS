@@ -1,6 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 
 @Component({
@@ -70,6 +71,7 @@ import { AuthService } from '../../../core/auth.service';
 export class MemberFeedbackComponent {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private router = inject(Router);
   effort = signal(3);
   energy = signal(3);
   sent = signal(false);
@@ -82,6 +84,9 @@ export class MemberFeedbackComponent {
       date: new Date().toISOString().split('T')[0],
       effort_level: this.effort(),
       energy_level: this.energy(),
-    }).subscribe(() => this.sent.set(true));
+    }).subscribe(() => {
+      this.sent.set(true);
+      this.router.navigate(['/member/dashboard']);
+    });
   }
 }

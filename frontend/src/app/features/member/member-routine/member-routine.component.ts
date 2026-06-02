@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
 
 @Component({
@@ -79,6 +80,7 @@ import { AuthService } from '../../../core/auth.service';
 export class MemberRoutineComponent {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private router = inject(Router);
   userId = this.auth.user()?.id;
   key = `member_routine_${this.userId}`;
   routines = toSignal(this.http.get<any[]>(`/api/v1/routines?user_id=${this.userId}`), { initialValue: [] });
@@ -106,6 +108,7 @@ export class MemberRoutineComponent {
       next: () => {
         this.completed.set(true);
         this.saving.set(false);
+        this.router.navigate(['/member/dashboard']);
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
